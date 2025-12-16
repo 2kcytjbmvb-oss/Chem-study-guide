@@ -1,346 +1,302 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Chemistry Interactive Study Guide</title>
-  <style>
-    :root{--bg:#0b1020;--panel:#121a33;--muted:#9fb0ff;--text:#eef1ff;--line:#26305a;--good:#39d98a;--bad:#ff6b6b;--warn:#ffd166;}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:var(--bg); color:var(--text);}
-    .app{display:grid; grid-template-columns:280px 1fr; min-height:100vh;}
-    nav{border-right:1px solid var(--line); background:rgba(255,255,255,0.02); padding:18px; position:sticky; top:0; height:100vh; overflow:auto;}
-    nav h1{font-size:16px; margin:0 0 10px 0; letter-spacing:.3px;}
-    .small{color:var(--muted); font-size:12px; margin:0 0 14px 0;}
-    .navbtn{width:100%; text-align:left; padding:10px 12px; border:1px solid var(--line); background:transparent; color:var(--text); border-radius:10px; margin:8px 0; cursor:pointer;}
-    .navbtn:hover{border-color:var(--muted)}
-    .navbtn[aria-current="page"]{background:rgba(159,176,255,0.12); border-color:var(--muted)}
-    main{padding:24px; max-width:980px;}
-    header{display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
-    header h2{margin:0; font-size:22px;}
-    .pill{border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-size:12px; color:var(--muted)}
-    .card{border:1px solid var(--line); border-radius:16px; padding:16px; background:rgba(255,255,255,0.03); margin:14px 0;}
-    details{border:1px solid var(--line); border-radius:14px; padding:12px 14px; background:rgba(255,255,255,0.02);}
-    details summary{cursor:pointer; font-weight:600;}
-    .grid{display:grid; gap:12px;}
-    @media (min-width:860px){ .grid.two{grid-template-columns:1fr 1fr;} }
-    .q{padding:12px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,0.02);}
-    .q h4{margin:0 0 8px 0; font-size:14px;}
-    label{display:block; padding:6px 8px; border-radius:10px; border:1px solid transparent; cursor:pointer;}
-    label:hover{border-color:var(--line)}
-    .feedback{margin-top:8px; font-size:13px;}
-    .ok{color:var(--good)} .no{color:var(--bad)} .warn{color:var(--warn)}
-    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
-    .btn{border:1px solid var(--line); background:transparent; color:var(--text); padding:8px 10px; border-radius:12px; cursor:pointer;}
-    .btn:hover{border-color:var(--muted)}
-    textarea{width:100%; min-height:88px; padding:10px; border-radius:12px; border:1px solid var(--line); background:rgba(0,0,0,0.25); color:var(--text);}
-    .reveal{display:none; margin-top:8px; padding:10px; border-left:3px solid var(--muted); background:rgba(159,176,255,0.10); border-radius:10px;}
-    .check{width:18px; height:18px; border:1px solid var(--line); border-radius:5px; display:inline-flex; align-items:center; justify-content:center; margin-left:8px;}
-    .check.done{border-color:var(--good); color:var(--good)}
-    .footer{color:var(--muted); font-size:12px; margin-top:18px;}
-    a{color:var(--muted)}
-  </style>
+<meta charset="utf-8">
+<title>Chemistry Interactive Study Guide</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root{
+  --bg:#f4f6fb;
+  --text:#1f2a44;
+  --muted:#5a6b8a;
+  --card:#ffffff;
+  --line:#e3e7f2;
+
+  --u1:#3498db;
+  --u2:#27ae60;
+  --u3:#9b59b6;
+  --u4:#e74c3c;
+  --u5:#f39c12;
+  --u6:#16a085;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.app{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  min-height:100vh;
+}
+
+nav{
+  background:#fff;
+  border-right:1px solid var(--line);
+  padding:16px;
+}
+
+.navbtn{
+  width:100%;
+  margin:6px 0;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:#fff;
+  cursor:pointer;
+  text-align:left;
+  font-weight:600;
+}
+
+.navbtn[aria-current="page"]{
+  background:#eef3ff;
+  border-color:#b9c6ff;
+}
+
+main{
+  padding:24px;
+  max-width:980px;
+}
+
+.unitHeader{
+  color:#fff;
+  padding:16px;
+  border-radius:16px;
+  margin-bottom:18px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.15);
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:16px;
+  margin:14px 0;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+}
+
+label{
+  display:block;
+  margin:6px 0;
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  cursor:pointer;
+}
+
+label:hover{background:#f6f8ff}
+
+textarea{
+  width:100%;
+  min-height:80px;
+  padding:8px;
+  border-radius:8px;
+  border:1px solid var(--line);
+}
+
+.btn{
+  margin-top:8px;
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:#fff;
+  cursor:pointer;
+}
+
+.reveal{display:none;margin-top:8px;color:#2c3e50;font-style:italic}
+.feedback{margin-top:6px;font-weight:700}
+.ok{color:#27ae60}
+.no{color:#e74c3c}
+
+footer{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:24px;
+}
+</style>
 </head>
+
 <body>
 <div class="app">
-  <nav>
-    <h1>Chem Study Guide</h1>
-    <p class="small">Interactive notes + quick checks + progress.</p>
 
-    <button class="navbtn" data-page="intro">Intro to Chem <span class="check" id="chk-intro">✓</span></button>
-    <button class="navbtn" data-page="atoms">Atoms <span class="check" id="chk-atoms">✓</span></button>
-    <button class="navbtn" data-page="ptable">Periodic Table <span class="check" id="chk-ptable">✓</span></button>
-    <button class="navbtn" data-page="bonding">Bonding <span class="check" id="chk-bonding">✓</span></button>
-    <button class="navbtn" data-page="moles">Moles <span class="check" id="chk-moles">✓</span></button>
-    <button class="navbtn" data-page="equations">Equations <span class="check" id="chk-equations">✓</span></button>
+<nav>
+  <h3>Chem Study Guide</h3>
+  <button class="navbtn" onclick="show('intro')" aria-current="page">Intro to Chemistry</button>
+  <button class="navbtn" onclick="show('atoms')">Atoms</button>
+  <button class="navbtn" onclick="show('ptable')">Periodic Table</button>
+  <button class="navbtn" onclick="show('bonding')">Bonding</button>
+  <button class="navbtn" onclick="show('moles')">Moles</button>
+  <button class="navbtn" onclick="show('equations')">Equations</button>
+</nav>
 
-    <div class="card">
-      <div class="row">
-        <button class="btn" id="markDoneBtn">Mark this section done</button>
-        <button class="btn" id="resetBtn">Reset progress</button>
-      </div>
-      <p class="small" style="margin-top:10px;">Progress saves on this device/browser.</p>
-    </div>
-  </nav>
+<main>
 
-  <main>
-    <header>
-      <h2 id="title"></h2>
-      <span class="pill" id="tag"></span>
-    </header>
+<section id="intro">
+<div class="unitHeader" style="background:var(--u1)">
+  <h2>Intro to Chemistry</h2>
+  <div>Matter • Properties • Measurement</div>
+</div>
+<div id="qbank-intro"></div>
+</section>
 
-    <!-- PAGES -->
-    <section class="page" id="page-intro">
-      <div class="card">
-        <h3>Big ideas</h3>
-        <ul>
-          <li>Matter, properties, and classification (pure substances vs mixtures)</li>
-          <li>Physical vs chemical changes</li>
-          <li>Measurement, sig figs, accuracy vs precision</li>
-        </ul>
-        <p class="small">Based on your “Intro to Chemistry” case unit themes. (See objectives: extensive/intensive, sig figs, accuracy/precision, classifying matter.)</p>
-      </div>
+<section id="atoms" hidden>
+<div class="unitHeader" style="background:var(--u2)">
+  <h2>Atoms</h2>
+  <div>Atomic Models • Isotopes • EM Spectrum</div>
+</div>
+<div id="qbank-atoms"></div>
+</section>
 
-      <details class="card" open>
-        <summary>Notes: Matter & Properties</summary>
-        <div class="grid two" style="margin-top:12px;">
-          <div class="card">
-            <h4>Quick definitions</h4>
-            <ul>
-              <li><b>Extensive</b>: depends on amount (mass, volume)</li>
-              <li><b>Intensive</b>: independent of amount (density, melting point)</li>
-              <li><b>Accuracy</b> vs <b>precision</b></li>
-            </ul>
-          </div>
-          <div class="card">
-            <h4>Decision tree</h4>
-            <p class="small">Matter → Pure substance (element/compound) OR Mixture (homogeneous/heterogeneous).</p>
-          </div>
-        </div>
-      </details>
+<section id="ptable" hidden>
+<div class="unitHeader" style="background:var(--u3)">
+  <h2>Periodic Table</h2>
+  <div>Families • Trends • Valence</div>
+</div>
+<div id="qbank-ptable"></div>
+</section>
 
-      <div class="card">
-        <h3>Quick Check</h3>
-        <div class="grid two">
-          <div class="q" data-answer="b">
-            <h4>1) Which is an intensive property?</h4>
-            <label><input type="radio" name="q1" value="a"> Mass</label>
-            <label><input type="radio" name="q1" value="b"> Density</label>
-            <label><input type="radio" name="q1" value="c"> Volume</label>
-            <div class="feedback"></div>
-          </div>
+<section id="bonding" hidden>
+<div class="unitHeader" style="background:var(--u4)">
+  <h2>Bonding</h2>
+  <div>Lewis • Polarity • VSEPR</div>
+</div>
+<div id="qbank-bonding"></div>
+</section>
 
-          <div class="q" data-answer="c">
-            <h4>2) Which is a chemical change?</h4>
-            <label><input type="radio" name="q2" value="a"> Melting ice</label>
-            <label><input type="radio" name="q2" value="b"> Crushing sugar</label>
-            <label><input type="radio" name="q2" value="c"> Iron rusting</label>
-            <div class="feedback"></div>
-          </div>
-        </div>
-      </div>
-    </section>
+<section id="moles" hidden>
+<div class="unitHeader" style="background:var(--u5)">
+  <h2>Moles</h2>
+  <div>Molar Mass • Avogadro • Formulas</div>
+</div>
+<div id="qbank-moles"></div>
+</section>
 
-    <section class="page" id="page-atoms" hidden>
-      <div class="card">
-        <h3>Big ideas</h3>
-        <ul>
-          <li>Atomic model timeline (Dalton → Thomson → Rutherford → Bohr → quantum)</li>
-          <li>EM spectrum: wavelength ↔ frequency ↔ energy</li>
-          <li>Atomic structure, ions, isotopes, average atomic mass</li>
-        </ul>
-        <p class="small">Matches your “Found or Forgery” atom unit objectives (atomic theory models, EM spectrum relationships, average atomic mass). </p>
-      </div>
+<section id="equations" hidden>
+<div class="unitHeader" style="background:var(--u6)">
+  <h2>Equations</h2>
+  <div>Balancing • Reaction Types</div>
+</div>
+<div id="qbank-equations"></div>
+</section>
 
-      <details class="card">
-        <summary>Short-answer practice</summary>
-        <p>Explain (in 2–3 sentences): why Rutherford’s gold foil experiment changed the “plum pudding” model.</p>
-        <textarea placeholder="Type your answer here..."></textarea>
-        <div class="row" style="margin-top:10px;">
-          <button class="btn revealBtn">Show sample answer</button>
-        </div>
-        <div class="reveal">
-          Rutherford observed rare, large-angle deflections of alpha particles, implying a tiny, dense, positively charged nucleus. Most particles passed through, showing atoms are mostly empty space, which contradicted Thomson’s diffuse positive-charge model.
-        </div>
-      </details>
+<footer>
+  Hosted on GitHub Pages • Best viewed fullscreen
+</footer>
 
-      <div class="card">
-        <h3>Quick Check</h3>
-        <div class="q" data-answer="a">
-          <h4>1) As wavelength decreases, frequency and energy generally…</h4>
-          <label><input type="radio" name="a1" value="a"> increase</label>
-          <label><input type="radio" name="a1" value="b"> decrease</label>
-          <label><input type="radio" name="a1" value="c"> stay the same</label>
-          <div class="feedback"></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="page" id="page-ptable" hidden>
-      <div class="card">
-        <h3>Big ideas</h3>
-        <ul>
-          <li>Families/groups & valence electrons</li>
-          <li>Trends: atomic radius, ionization energy, electronegativity</li>
-          <li>Metals/nonmetals/metalloids</li>
-        </ul>
-        <p class="small">Aligned to your periodic-table trend focus (families + trends + configurations). </p>
-      </div>
-
-      <div class="card">
-        <h3>Quick Check</h3>
-        <div class="grid two">
-          <div class="q" data-answer="b">
-            <h4>1) Across a period (left → right), atomic radius generally…</h4>
-            <label><input type="radio" name="p1" value="a"> increases</label>
-            <label><input type="radio" name="p1" value="b"> decreases</label>
-            <div class="feedback"></div>
-          </div>
-          <div class="q" data-answer="a">
-            <h4>2) Down a group, ionization energy generally…</h4>
-            <label><input type="radio" name="p2" value="a"> decreases</label>
-            <label><input type="radio" name="p2" value="b"> increases</label>
-            <div class="feedback"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="page" id="page-bonding" hidden>
-      <div class="card">
-        <h3>Big ideas</h3>
-        <ul>
-          <li>Ionic vs covalent vs metallic bonding</li>
-          <li>Lewis structures, polarity, VSEPR shapes</li>
-          <li>IMFs and how bonding affects properties</li>
-        </ul>
-        <p class="small">This mirrors your “When Bonds Break” scope (Lewis, naming, polarity, VSEPR, IMFs, bulk properties). </p>
-      </div>
-
-      <details class="card">
-        <summary>Practice: VSEPR rapid-sort</summary>
-        <p class="small">Match the electron geometry to the molecular shape for AX2E2.</p>
-        <div class="row">
-          <button class="btn revealBtn">Show answer</button>
-        </div>
-        <div class="reveal">AX2E2 → tetrahedral electron geometry, <b>bent</b> molecular shape.</div>
-      </details>
-    </section>
-
-    <section class="page" id="page-moles" hidden>
-      <div class="card">
-        <h3>Big ideas</h3>
-        <ul>
-          <li>Mole concept, molar mass, Avogadro’s number</li>
-          <li>Mass ↔ moles ↔ particles conversions</li>
-          <li>Percent composition, empirical vs molecular formulas</li>
-        </ul>
-        <p class="small">Matches your “Poisonous Pill” unit objectives (molar mass, Avogadro, percent composition, empirical/molecular). </p>
-      </div>
-
-      <div class="card">
-        <h3>Quick Check</h3>
-        <div class="q" data-answer="c">
-          <h4>1) 1 mole contains…</h4>
-          <label><input type="radio" name="m1" value="a"> 1.00 × 10²³ particles</label>
-          <label><input type="radio" name="m1" value="b"> 3.00 × 10⁸ particles</label>
-          <label><input type="radio" name="m1" value="c"> 6.022 × 10²³ particles</label>
-          <div class="feedback"></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="page" id="page-equations" hidden>
-      <div class="card">
-        <h3>Big ideas</h3>
-        <ul>
-          <li>Writing & balancing equations (conservation of mass)</li>
-          <li>Reaction types: synthesis, decomposition, single/double replacement, combustion</li>
-          <li>Predicting products</li>
-        </ul>
-        <p class="small">Aligned to your “Crash” equations unit objectives (write/balance, classify reaction types). </p>
-      </div>
-
-      <div class="card">
-        <h3>Quick Check</h3>
-        <div class="q" data-answer="b">
-          <h4>1) CH₄ + 2O₂ → CO₂ + 2H₂O is best classified as…</h4>
-          <label><input type="radio" name="e1" value="a"> single replacement</label>
-          <label><input type="radio" name="e1" value="b"> combustion</label>
-          <label><input type="radio" name="e1" value="c"> double replacement</label>
-          <div class="feedback"></div>
-        </div>
-      </div>
-    </section>
-
-    <p class="footer">
-      Tip: Host on GitHub Pages and embed in Canvas as an iframe (Canvas needs the site to be public).
-    </p>
-  </main>
+</main>
 </div>
 
 <script>
-  const pages = [
-    {id:"intro", title:"Intro to Chemistry", tag:"Matter • Measurement • Properties"},
-    {id:"atoms", title:"Atoms", tag:"Atomic Models • EM Spectrum • Isotopes"},
-    {id:"ptable", title:"Periodic Table", tag:"Families • Trends • Valence"},
-    {id:"bonding", title:"Bonding", tag:"Lewis • Polarity • VSEPR • IMFs"},
-    {id:"moles", title:"Moles", tag:"Molar Mass • Avogadro • Formulas"},
-    {id:"equations", title:"Equations", tag:"Balance • Types • Predict Products"},
-  ];
+const BANK={
+intro:[
+{q:"Which is an intensive property?",c:["Mass","Density","Volume"],a:1,e:"Density does not depend on amount."},
+{q:"Which is a chemical change?",c:["Melting ice","Crushing sugar","Iron rusting"],a:2,e:"Rusting forms a new substance."},
+{q:"Homogeneous mixtures are…",c:["Visible layers","Uniform","Pure"],a:1,e:"Same composition throughout."},
+{q:"Accuracy means…",c:["Close to true value","Close to each other","Lots of sig figs"],a:0,e:"Precision ≠ accuracy."},
+{q:"Sig figs in 0.0405?",c:["2","3","4"],a:1,e:"0.0405 → 3 sig figs."},
+{sa:"Classify salty water.",ans:"Homogeneous mixture."},
+{sa:"Difference between element and compound?",ans:"Elements are one type of atom; compounds are chemically bonded elements."}
+],
 
-  const stateKey = "chemStudyGuideProgressV1";
-  const state = JSON.parse(localStorage.getItem(stateKey) || "{}");
-  let current = state.current || "intro";
+atoms:[
+{q:"Rutherford showed atoms have…",c:["Diffuse charge","Dense nucleus","No electrons"],a:1,e:"Large deflections imply nucleus."},
+{q:"As wavelength decreases, energy…",c:["Decreases","Increases","Stays same"],a:1,e:"E ∝ frequency."},
+{q:"Isotopes differ in number of…",c:["Protons","Neutrons","Electrons"],a:1,e:"Same Z, different N."},
+{q:"17 p⁺ and 18 e⁻ gives charge…",c:["+1","0","−1"],a:2,e:"One extra electron."},
+{q:"Average atomic mass is…",c:["Simple average","Weighted average","Mass number"],a:1,e:"Uses abundances."},
+{sa:"Write nuclear notation for carbon-14.",ans:"¹⁴₆C"},
+{sa:"What did Bohr improve on?",ans:"Quantized energies; quantum fixed limitations."}
+],
 
-  function setCurrent(id){
-    current = id;
-    state.current = id;
-    localStorage.setItem(stateKey, JSON.stringify(state));
-    document.querySelectorAll(".page").forEach(p => p.hidden = true);
-    document.getElementById("page-"+id).hidden = false;
+ptable:[
+{q:"Across a period, radius…",c:["Increases","Decreases","Constant"],a:1,e:"Z_eff increases."},
+{q:"Down a group, ionization energy…",c:["Increases","Decreases","Same"],a:1,e:"More shielding."},
+{q:"Same group elements share…",c:["Mass","Valence electrons","Neutrons"],a:1,e:"Valence drives chemistry."},
+{q:"Metals are mostly on the…",c:["Right","Left/middle","Diagonal"],a:1,e:"Periodic layout."},
+{q:"Electronegativity increases…",c:["Down-left","Up-right","Down-right"],a:1,e:"Toward fluorine."},
+{sa:"Why do alkali metals form +1 ions?",ans:"One valence electron, low ionization energy."},
+{sa:"Which is larger: Na or Cl?",ans:"Na, due to lower nuclear pull."}
+],
 
-    const meta = pages.find(p=>p.id===id);
-    document.getElementById("title").textContent = meta.title;
-    document.getElementById("tag").textContent = meta.tag;
+bonding:[
+{q:"Metal + nonmetal bond is…",c:["Covalent","Ionic","Hydrogen"],a:1,e:"Electron transfer."},
+{q:"Which molecule is polar?",c:["CO₂","CH₄","NH₃"],a:2,e:"Trigonal pyramidal."},
+{q:"AX2E2 shape is…",c:["Linear","Bent","Tetrahedral"],a:1,e:"Two lone pairs."},
+{q:"Stronger IMFs cause…",c:["Lower BP","Higher BP","No change"],a:1,e:"More energy needed."},
+{q:"Ionic compounds conduct when…",c:["Solid","Dissolved","Frozen"],a:1,e:"Mobile ions."},
+{sa:"Lewis structure of H₂O?",ans:"O center, two bonds, two lone pairs."},
+{sa:"Why is CO₂ nonpolar?",ans:"Linear and symmetric dipoles cancel."}
+],
 
-    document.querySelectorAll(".navbtn").forEach(b=>{
-      b.setAttribute("aria-current", b.dataset.page===id ? "page" : "false");
-    });
+moles:[
+{q:"1 mole equals…",c:["3×10⁸","6.022×10²³","1×10²³"],a:1,e:"Avogadro’s number."},
+{q:"Molar mass of CO₂?",c:["28","32","44"],a:2,e:"12 + 16×2."},
+{q:"22 g NaCl to moles?",c:["0.38","2.7","58"],a:0,e:"22/58.44."},
+{q:"Percent by mass means…",c:["Mass fraction","Mole fraction","Volume"],a:0,e:"×100%."},
+{q:"Empirical formula gives…",c:["Exact atoms","Simplest ratio","Mass"],a:1,e:"Reduced."},
+{sa:"Atoms in 0.5 mol He?",ans:"3.01×10²³ atoms."},
+{sa:"Empirical CH₂, MM=56 → ?",ans:"C₄H₈."}
+],
 
-    renderChecks();
-    window.scrollTo({top:0, behavior:"instant"});
-  }
+equations:[
+{q:"CH₄ + O₂ → CO₂ + H₂O is…",c:["Synthesis","Combustion","Replacement"],a:1,e:"Hydrocarbon combustion."},
+{q:"Balance Al + O₂ → Al₂O₃",c:["2,3,1","4,3,2","1,1,1"],a:1,e:"4Al + 3O₂ → 2Al₂O₃"},
+{q:"Single replacement form is…",c:["AB→A+B","A+BC→AC+B","AB+CD→AD+CB"],a:1,e:"Element swap."},
+{q:"Na₂SO₄ + BaCl₂ → ?",c:["NaCl+BaSO₄","No rxn","NaBaSO₄"],a:0,e:"Double replacement."},
+{q:"Decomposition is…",c:["A+B→AB","AB→A+B","A+BC→AC+B"],a:1,e:"Break apart."},
+{sa:"Write balanced H₂ + O₂ → H₂O",ans:"2H₂ + O₂ → 2H₂O"},
+{sa:"Why balance equations?",ans:"Conserves atoms/mass."}
+]
+};
 
-  function renderChecks(){
-    pages.forEach(p=>{
-      const el = document.getElementById("chk-"+p.id);
-      const done = !!state["done_"+p.id];
-      el.classList.toggle("done", done);
-      el.style.visibility = done ? "visible" : "hidden";
-    });
-  }
+function render(unit){
+const host=document.getElementById("qbank-"+unit);
+host.innerHTML=BANK[unit].map((x,i)=>{
+if(x.q){
+return `<div class="card">
+<b>${i+1}) ${x.q}</b>
+${x.c.map((c,j)=>`<label><input type="radio" name="${unit}${i}" value="${j}"> ${c}</label>`).join("")}
+<div class="feedback"></div>
+<button class="btn">Why?</button>
+<div class="reveal">${x.e}</div>
+</div>`;
+}else{
+return `<div class="card">
+<b>${i+1}) ${x.sa}</b>
+<textarea></textarea>
+<button class="btn">Show sample</button>
+<div class="reveal">${x.ans}</div>
+</div>`;
+}
+}).join("");
 
-  document.querySelectorAll(".navbtn").forEach(btn=>{
-    btn.addEventListener("click", ()=> setCurrent(btn.dataset.page));
-  });
+host.querySelectorAll(".card").forEach((card,i)=>{
+card.addEventListener("change",e=>{
+const idx=i;
+const q=BANK[unit][idx];
+if(!q.q) return;
+const fb=card.querySelector(".feedback");
+fb.innerHTML=Number(e.target.value)===q.a?'<span class="ok">✓ Correct</span>':'<span class="no">✗ Try again</span>';
+});
+card.querySelector(".btn").onclick=()=>card.querySelector(".reveal").style.display=
+card.querySelector(".reveal").style.display==="block"?"none":"block";
+});
+}
 
-  document.getElementById("markDoneBtn").addEventListener("click", ()=>{
-    state["done_"+current] = true;
-    localStorage.setItem(stateKey, JSON.stringify(state));
-    renderChecks();
-  });
+["intro","atoms","ptable","bonding","moles","equations"].forEach(render);
 
-  document.getElementById("resetBtn").addEventListener("click", ()=>{
-    localStorage.removeItem(stateKey);
-    location.reload();
-  });
-
-  // Auto-grade multiple choice blocks
-  document.querySelectorAll(".q").forEach(block=>{
-    block.addEventListener("change", (e)=>{
-      if(e.target.type!=="radio") return;
-      const correct = block.dataset.answer;
-      const chosen = e.target.value;
-      const fb = block.querySelector(".feedback");
-      if(chosen === correct){
-        fb.innerHTML = `<span class="ok">✓ Correct</span>`;
-      } else {
-        fb.innerHTML = `<span class="no">✗ Not quite</span> <span class="warn">(Try again.)</span>`;
-      }
-    });
-  });
-
-  // Reveal buttons
-  document.querySelectorAll(".revealBtn").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const reveal = btn.closest(".card, details")?.querySelector(".reveal");
-      if(!reveal) return;
-      reveal.style.display = (reveal.style.display==="block") ? "none" : "block";
-    });
-  });
-
-  setCurrent(current);
+function show(id){
+document.querySelectorAll("section").forEach(s=>s.hidden=true);
+document.getElementById(id).hidden=false;
+document.querySelectorAll(".navbtn").forEach(b=>b.setAttribute("aria-current","false"));
+event.target.setAttribute("aria-current","page");
+}
 </script>
 </body>
 </html>
+
