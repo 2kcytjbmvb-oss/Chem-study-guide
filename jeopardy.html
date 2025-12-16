@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Chem Jeopardy Review</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --text:#1f2a44; --muted:#5a6b8a; --card:#fff; --line:#e3e7f2;
+    --u1:#3498db; --u2:#27ae60; --u3:#9b59b6; --u4:#e74c3c; --u5:#f39c12; --u6:#16a085;
+    --shadow: 0 10px 25px rgba(16,24,40,.12);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text);}
+  header{max-width:1200px;margin:18px auto 10px; padding:0 16px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
+  header h1{margin:0;font-size:20px}
+  .pill{padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--muted);font-size:12px}
+  .controls{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:#fff;color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer}
+  .btn:hover{border-color:#b9c6ff}
+  .score{font-weight:800}
+  main{max-width:1200px;margin:0 auto;padding:12px 16px 28px;}
+  .board{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+  .cat{color:#fff;border-radius:14px;padding:12px;box-shadow:var(--shadow);font-weight:900;text-align:center;min-height:64px;display:flex;align-items:center;justify-content:center;}
+  .cell{
+    background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 2px 10px rgba(16,24,40,.06);
+    padding:18px; text-align:center; font-weight:900; font-size:20px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; min-height:74px;
+  }
+  .cell.used{opacity:.35; cursor:not-allowed; text-decoration:line-through}
+  .cell.dd{border:2px solid #ffd166}
+  .cell:hover{border-color:#b9c6ff}
+  .hint{color:var(--muted);font-size:12px;margin-top:10px}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;}
+  .modal{width:min(760px,100%); background:#fff; border-radius:18px; border:1px solid var(--line); box-shadow:var(--shadow); overflow:hidden;}
+  .mhead{padding:14px 16px; color:#fff; display:flex; gap:10px; align-items:center; justify-content:space-between;}
+  .mhead .left{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .tag{font-weight:900}
+  .value{background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.22); padding:4px 8px; border-radius:999px; font-weight:900}
+  .close{background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.22); color:#fff; padding:6px 10px; border-radius:10px; cursor:pointer}
+  .close:hover{background:rgba(255,255,255,.26)}
+  .mbody{padding:16px;}
+  .qtext{font-size:18px; font-weight:800; line-height:1.35}
+  .sub{margin-top:8px; color:var(--muted); font-size:13px}
+  .reveal{display:none; margin-top:14px; padding:12px; border-left:4px solid #b9c6ff; background:#f3f6ff; border-radius:12px;}
+  .reveal b{display:block;margin-bottom:6px}
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:14px;}
+  .ok{color:#27ae60;font-weight:900}
+  .no{color:#e74c3c;font-weight:900}
+  .note{color:var(--muted); font-size:12px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Chem Jeopardy Review</h1>
+  <span class="pill">Click a dollar value → answer → adjust score</span>
+  <div class="controls">
+    <span class="pill">Score: <span class="score" id="score">0</span></span>
+    <button class="btn" id="reset">Reset board</button>
+    <button class="btn" id="random">Random clue</button>
+  </div>
+</header>
+
+<main>
+  <div class="board" id="board"></div>
+  <div class="hint">Teacher tip: This works great with teams. After revealing the answer, click “+” or “−” to adjust score.</div>
+</main>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="mhead" id="mhead">
+      <div class="left">
+        <span class="tag" id="mtag">Category</span>
+        <span class="value" id="mval">$100</span>
+        <span class="value" id="mdd" style="display:none;">DAILY DOUBLE</span>
+      </div>
+      <button class="close" id="close">Close</button>
+    </div>
+    <div class="mbody">
+      <div class="qtext" id="qtext"></div>
+      <div class="sub" id="qsub"></div>
+
+      <div class="row">
+        <button class="btn" id="showAns">Reveal answer</button>
+        <span class="note">Then mark correct/incorrect:</span>
+        <button class="btn" id="plus">+ value</button>
+        <button class="btn" id="minus">− value</button>
+      </div>
+
+      <div class="reveal" id="reveal">
+        <b>Answer</b>
+        <div id="atext"></div>
+      </div>
+
+      <div class="sub" id="locked" style="margin-top:10px; display:none;">
+        This clue is now marked used on the board.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* --------------------------
+   DATA (6 categories x 5 values)
+-------------------------- */
+const CATS = [
+  { id:"intro",  name:"Intro to Chem",  color:"var(--u1)" },
+  { id:"atoms",  name:"Atoms",          color:"var(--u2)" },
+  { id:"ptable", name:"Periodic Table", color:"var(--u3)" },
+  { id:"bond",   name:"Bonding",        color:"var(--u4)" },
+  { id:"moles",  name:"Moles",          color:"var(--u5)" },
+  { id:"eq",     name:"Equations",      color:"var(--u6)" },
+];
+
+const VALUES = [100,200,300,400,500];
+
+const CLUES = {
+  intro: [
+    {q:"Name the property type: depends on the amount of substance (mass, volume).", a:"Extensive property."},
+    {q:"Accuracy vs precision: which means “close to the true value”?", a:"Accuracy."},
+    {q:"Classify matter: element, compound, or mixture? (salt water)", a:"Mixture (homogeneous solution)."},
+    {q:"Physical vs chemical change: rusting iron is which kind?", a:"Chemical change (new substance forms)."},
+    {q:"Significant figures: How many sig figs in 0.04050?", a:"4 significant figures."}
+  ],
+  atoms: [
+    {q:"If wavelength decreases, what happens to frequency (and energy)?", a:"Frequency increases (and energy increases)."},
+    {q:"What did Rutherford’s gold foil experiment reveal about atoms?", a:"A small, dense, positively charged nucleus; atoms are mostly empty space."},
+    {q:"Same element, different neutrons: what are these called?", a:"Isotopes."},
+    {q:"An atom with 17 protons and 18 electrons has what net charge?", a:"−1 (one extra electron)."},
+    {q:"Average atomic mass is calculated as what kind of average?", a:"A weighted average using isotopic abundances."}
+  ],
+  ptable: [
+    {q:"Across a period (left → right), atomic radius generally does what?", a:"Decreases."},
+    {q:"Down a group, ionization energy generally does what?", a:"Decreases."},
+    {q:"Elements in the same group share similar chemistry because they share similar…", a:"Valence electron patterns."},
+    {q:"Name the families: Group 1 and Group 17 are called what?", a:"Alkali metals; Halogens."},
+    {q:"Which trend increases toward the top-right corner of the table (toward F)?", a:"Electronegativity (also ionization energy generally increases up/right)."}
+  ],
+  bond: [
+    {q:"Bond type most likely between a metal and a nonmetal?", a:"Ionic bonding."},
+    {q:"VSEPR: AX2E2 has what molecular shape?", a:"Bent (tetrahedral electron geometry)."},
+    {q:"Which is polar: CO2, CH4, or NH3?", a:"NH3 is polar."},
+    {q:"Name the forces between molecules: attraction between partial charges in polar molecules.", a:"Dipole–dipole forces (an intermolecular force)."},
+    {q:"Why do ionic compounds conduct electricity in solution but not as solids?", a:"Ions are mobile in solution; locked in place in a solid lattice."}
+  ],
+  moles: [
+    {q:"How many particles are in 1 mole?", a:"6.022 × 10^23 particles (Avogadro’s number)."},
+    {q:"Convert: 22.0 g NaCl (58.44 g/mol) → moles (closest).", a:"≈ 0.376 mol."},
+    {q:"Define percent composition.", a:"(mass of element ÷ total mass of compound) × 100%."},
+    {q:"Empirical vs molecular formula: which is simplest whole-number ratio?", a:"Empirical formula."},
+    {q:"Empirical CH2, molar mass 56 g/mol → molecular formula?", a:"C4H8 (because 56/14 = 4)."}
+  ],
+  eq: [
+    {q:"Balance: __Al + __O2 → __Al2O3", a:"4Al + 3O2 → 2Al2O3."},
+    {q:"Classify: CH4 + 2O2 → CO2 + 2H2O", a:"Combustion."},
+    {q:"Reaction pattern: AB → A + B is called what?", a:"Decomposition."},
+    {q:"Reaction pattern: A + BC → AC + B is called what?", a:"Single replacement (single displacement)."},
+    {q:"Why do we balance equations?", a:"To obey conservation of atoms/mass (same number of each atom on both sides)."}
+  ]
+};
+
+/* --------------------------
+   STATE
+-------------------------- */
+const KEY = "chemJeopV1";
+let state = JSON.parse(localStorage.getItem(KEY) || "{}");
+if (!state.used) state.used = {}; // used["cat-idx"]=true
+if (typeof state.score !== "number") state.score = 0;
+
+let currentClue = null; // {catId, idx, value, dd}
+
+/* --------------------------
+   BUILD BOARD
+-------------------------- */
+const board = document.getElementById("board");
+
+function cellKey(catId, idx){ return `${catId}-${idx}`; }
+
+function pickDailyDouble(){
+  // choose one clue not yet used
+  const all = [];
+  for (const cat of CATS){
+    for (let i=0;i<5;i++) all.push({catId:cat.id, idx:i});
+  }
+  const unused = all.filter(x => !state.used[cellKey(x.catId, x.idx)]);
+  if (unused.length === 0) return null;
+  return unused[Math.floor(Math.random()*unused.length)];
+}
+
+function renderBoard(){
+  board.innerHTML = "";
+
+  // categories row
+  for (const cat of CATS){
+    const el = document.createElement("div");
+    el.className = "cat";
+    el.style.background = cat.color;
+    el.textContent = cat.name;
+    board.appendChild(el);
+  }
+
+  // decide daily double (persist)
+  if (!state.dd) state.dd = pickDailyDouble();
+  const dd = state.dd;
+
+  // value rows
+  for (let r=0;r<5;r++){
+    for (const cat of CATS){
+      const idx = r;
+      const value = VALUES[r];
+      const k = cellKey(cat.id, idx);
+
+      const el = document.createElement("div");
+      el.className = "cell";
+      el.textContent = "$" + value;
+
+      if (state.used[k]) el.classList.add("used");
+      if (dd && dd.catId === cat.id && dd.idx === idx && !state.used[k]) el.classList.add("dd");
+
+      el.addEventListener("click", ()=>{
+        if (state.used[k]) return;
+        openClue(cat.id, idx, value, dd && dd.catId===cat.id && dd.idx===idx);
+      });
+
+      board.appendChild(el);
+    }
+  }
+
+  document.getElementById("score").textContent = state.score;
+  localStorage.setItem(KEY, JSON.stringify(state));
+}
+
+/* --------------------------
+   MODAL
+-------------------------- */
+const overlay = document.getElementById("overlay");
+const closeBtn = document.getElementById("close");
+const mhead = document.getElementById("mhead");
+const mtag = document.getElementById("mtag");
+const mval = document.getElementById("mval");
+const mdd = document.getElementById("mdd");
+const qtext = document.getElementById("qtext");
+const qsub = document.getElementById("qsub");
+const reveal = document.getElementById("reveal");
+const atext = document.getElementById("atext");
+const locked = document.getElementById("locked");
+
+function openClue(catId, idx, value, isDD){
+  const cat = CATS.find(c=>c.id===catId);
+  const clue = CLUES[catId][idx];
+
+  currentClue = {catId, idx, value, dd:isDD};
+
+  mhead.style.background = cat.color;
+  mtag.textContent = cat.name;
+  mval.textContent = "$" + value;
+  mdd.style.display = isDD ? "inline-block" : "none";
+
+  qtext.textContent = clue.q;
+  qsub.textContent = isDD
+    ? "Daily Double: teacher can set a custom wager if you want — or just use the listed value."
+    : "Discuss for ~20–30 seconds, then reveal.";
+
+  reveal.style.display = "none";
+  atext.textContent = clue.a;
+  locked.style.display = "none";
+
+  overlay.style.display = "flex";
+}
+
+function closeClue(){
+  overlay.style.display = "none";
+  currentClue = null;
+}
+
+closeBtn.addEventListener("click", closeClue);
+overlay.addEventListener("click", (e)=>{ if(e.target===overlay) closeClue(); });
+
+document.getElementById("showAns").addEventListener("click", ()=>{
+  reveal.style.display = (reveal.style.display==="block") ? "none" : "block";
+});
+
+/* score + mark used */
+function markUsedAnd(delta){
+  if (!currentClue) return;
+  state.score += delta;
+
+  const k = cellKey(currentClue.catId, currentClue.idx);
+  state.used[k] = true;
+
+  // if daily double was used, pick a new one for remaining clues (optional)
+  if (state.dd && state.dd.catId===currentClue.catId && state.dd.idx===currentClue.idx){
+    state.dd = pickDailyDouble();
+  }
+
+  document.getElementById("score").textContent = state.score;
+  locked.style.display = "block";
+  localStorage.setItem(KEY, JSON.stringify(state));
+  renderBoard();
+}
+
+document.getElementById("plus").addEventListener("click", ()=> markUsedAnd(+currentClue.value));
+document.getElementById("minus").addEventListener("click", ()=> markUsedAnd(-currentClue.value));
+
+/* --------------------------
+   CONTROLS
+-------------------------- */
+document.getElementById("reset").addEventListener("click", ()=>{
+  if (!confirm("Reset the board and score?")) return;
+  state = {score:0, used:{}, dd:null};
+  localStorage.setItem(KEY, JSON.stringify(state));
+  renderBoard();
+});
+
+document.getElementById("random").addEventListener("click", ()=>{
+  // open a random unused clue
+  const unused = [];
+  for (const cat of CATS){
+    for (let i=0;i<5;i++){
+      const k = cellKey(cat.id,i);
+      if (!state.used[k]) unused.push({catId:cat.id, idx:i});
+    }
+  }
+  if (unused.length===0){ alert("All clues used!"); return; }
+  const pick = unused[Math.floor(Math.random()*unused.length)];
+  const value = VALUES[pick.idx];
+  const isDD = state.dd && state.dd.catId===pick.catId && state.dd.idx===pick.idx;
+  openClue(pick.catId, pick.idx, value, isDD);
+});
+
+/* init */
+renderBoard();
+</script>
+</body>
+</html>
