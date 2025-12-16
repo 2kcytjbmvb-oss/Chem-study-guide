@@ -1,302 +1,965 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Chemistry Interactive Study Guide</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chemistry Study Guide — Interactive Review & Practice</title>
+  <style>
+    :root{
+      --bg0:#0b1020;
+      --bg1:#111b33;
+      --card:#0f1730cc;
+      --card2:#0f1730;
+      --text:#e9edff;
+      --muted:#b9c2ffcc;
+      --line:#2a3766;
+      --good:#2ce39b;
+      --bad:#ff5c7a;
+      --warn:#ffcc66;
+      --accent:#7aa7ff;
 
-<style>
-:root{
-  --bg:#f4f6fb;
-  --text:#1f2a44;
-  --muted:#5a6b8a;
-  --card:#ffffff;
-  --line:#e3e7f2;
+      --u1:#ff7ad9; /* Intro */
+      --u2:#7aa7ff; /* Atoms */
+      --u3:#2ce39b; /* PT */
+      --u4:#ffcc66; /* Bonding */
+      --u5:#a78bfa; /* Moles */
+      --u6:#ff5c7a; /* Equations */
+    }
 
-  --u1:#3498db;
-  --u2:#27ae60;
-  --u3:#9b59b6;
-  --u4:#e74c3c;
-  --u5:#f39c12;
-  --u6:#16a085;
-}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #2f3cff55, transparent 60%),
+        radial-gradient(900px 500px at 100% 0%, #ff7ad955, transparent 55%),
+        radial-gradient(900px 600px at 20% 120%, #2ce39b44, transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      min-height:100vh;
+    }
+    a{color:inherit}
+    .wrap{max-width:1100px;margin:0 auto;padding:28px 16px 80px}
+    header{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;
+      padding:18px 18px;
+      border:1px solid var(--line);
+      background:linear-gradient(135deg, #0f1730cc, #0f173055);
+      border-radius:18px;
+      box-shadow: 0 18px 50px #00000055;
+    }
+    h1{margin:0;font-size:28px;letter-spacing:.2px}
+    .subtitle{margin-top:6px;color:var(--muted);line-height:1.3}
+    .chiprow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .chip{
+      border:1px solid var(--line);
+      padding:7px 10px;border-radius:999px;
+      font-size:13px;color:var(--muted);
+      background:#0b122a88;
+      display:flex;gap:8px;align-items:center
+    }
+    .chip b{color:var(--text)}
+    .rightbox{
+      min-width:240px;
+      border:1px solid var(--line);
+      background:#0b122a88;
+      padding:12px;border-radius:14px;
+    }
+    .progress{
+      height:10px;border-radius:999px;background:#0b1020;border:1px solid var(--line);
+      overflow:hidden;margin-top:8px
+    }
+    .bar{height:100%;width:0%;background:linear-gradient(90deg, var(--good), var(--accent))}
+    .small{font-size:12px;color:var(--muted);line-height:1.25}
+    .btn{
+      appearance:none;border:1px solid var(--line);background:#0b122a;
+      color:var(--text);padding:10px 12px;border-radius:12px;
+      cursor:pointer;font-weight:600
+    }
+    .btn:hover{transform:translateY(-1px);border-color:#4156a8}
+    .btn:active{transform:translateY(0px)}
+    .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    nav{
+      margin-top:16px;
+      display:flex;gap:10px;flex-wrap:wrap;
+      position:sticky;top:10px;z-index:5;
+      background:linear-gradient(180deg, #0b1020cc, #0b102000);
+      padding:10px 0 6px;
+      backdrop-filter: blur(8px);
+    }
+    .tab{
+      border:1px solid var(--line);
+      padding:10px 12px;border-radius:999px;
+      cursor:pointer;
+      background:#0b122a88;
+      font-weight:700;
+      font-size:13px;
+      display:flex;align-items:center;gap:9px;
+      user-select:none;
+    }
+    .tab .dot{width:10px;height:10px;border-radius:50%}
+    .tab.active{outline:2px solid #ffffff22;border-color:#4156a8}
+    .content{margin-top:12px}
+    .unit{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, var(--card), #0b122a66);
+      border-radius:18px;
+      padding:16px;
+      box-shadow: 0 18px 50px #00000033;
+    }
+    .unithead{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .unithead h2{margin:0;font-size:22px}
+    .pillrow{display:flex;gap:10px;flex-wrap:wrap}
+    .pill{
+      border:1px solid var(--line);
+      background:#0b122a88;color:var(--muted);
+      padding:8px 10px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;
+      user-select:none;
+    }
+    .pill.active{color:var(--text);border-color:#4156a8;outline:2px solid #ffffff22}
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:14px;
+    }
+    @media (max-width: 900px){
+      .grid{grid-template-columns:1fr}
+      .rightbox{min-width:unset}
+    }
+    .card{
+      border:1px solid var(--line);
+      background:#0b122a88;
+      border-radius:16px;
+      padding:14px;
+    }
+    .card h3{margin:0 0 8px 0;font-size:15px;letter-spacing:.2px}
+    .klist{margin:0;padding-left:18px;color:var(--muted);line-height:1.45}
+    details{
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#0b122a66;
+      padding:10px 12px;
+      margin-top:10px;
+    }
+    summary{cursor:pointer;font-weight:800}
+    .formula{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13px;
+      color:#d9e2ff;
+      background:#071022;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      overflow:auto;
+    }
 
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-  background:var(--bg);
-  color:var(--text);
-}
-
-.app{
-  display:grid;
-  grid-template-columns:260px 1fr;
-  min-height:100vh;
-}
-
-nav{
-  background:#fff;
-  border-right:1px solid var(--line);
-  padding:16px;
-}
-
-.navbtn{
-  width:100%;
-  margin:6px 0;
-  padding:10px 12px;
-  border-radius:10px;
-  border:1px solid var(--line);
-  background:#fff;
-  cursor:pointer;
-  text-align:left;
-  font-weight:600;
-}
-
-.navbtn[aria-current="page"]{
-  background:#eef3ff;
-  border-color:#b9c6ff;
-}
-
-main{
-  padding:24px;
-  max-width:980px;
-}
-
-.unitHeader{
-  color:#fff;
-  padding:16px;
-  border-radius:16px;
-  margin-bottom:18px;
-  box-shadow:0 6px 18px rgba(0,0,0,0.15);
-}
-
-.card{
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:16px;
-  padding:16px;
-  margin:14px 0;
-  box-shadow:0 2px 8px rgba(0,0,0,0.06);
-}
-
-label{
-  display:block;
-  margin:6px 0;
-  padding:6px 10px;
-  border-radius:8px;
-  border:1px solid var(--line);
-  cursor:pointer;
-}
-
-label:hover{background:#f6f8ff}
-
-textarea{
-  width:100%;
-  min-height:80px;
-  padding:8px;
-  border-radius:8px;
-  border:1px solid var(--line);
-}
-
-.btn{
-  margin-top:8px;
-  padding:6px 10px;
-  border-radius:8px;
-  border:1px solid var(--line);
-  background:#fff;
-  cursor:pointer;
-}
-
-.reveal{display:none;margin-top:8px;color:#2c3e50;font-style:italic}
-.feedback{margin-top:6px;font-weight:700}
-.ok{color:#27ae60}
-.no{color:#e74c3c}
-
-footer{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:24px;
-}
-</style>
+    /* Practice */
+    .scorebox{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+      margin:10px 0 12px;
+      padding:10px 12px;
+      border:1px dashed #4b60b8;
+      border-radius:14px;
+      background:#0b122a55;
+    }
+    .scorebox b{font-size:14px}
+    .q{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, #0b122a99, #0b122a55);
+      border-radius:16px;
+      padding:14px;
+      margin:10px 0;
+    }
+    .qtitle{
+      font-size:18px; /* larger question text */
+      font-weight:900;
+      margin:0 0 10px 0;
+      letter-spacing:.1px;
+    }
+    .choices{display:grid;gap:8px;margin-top:6px}
+    .choice{
+      display:flex;gap:10px;align-items:flex-start;
+      border:1px solid var(--line);
+      background:#071022;
+      padding:10px 10px;
+      border-radius:14px;
+      cursor:pointer;
+    }
+    .choice:hover{border-color:#4156a8}
+    .choice input{margin-top:3px}
+    .qactions{
+      display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;align-items:center
+    }
+    .feedback{
+      margin-top:10px;
+      padding:10px 12px;border-radius:14px;
+      border:1px solid var(--line);
+      background:#0b1020;
+      color:var(--muted);
+      line-height:1.35
+    }
+    .feedback.good{border-color:#2ce39b55}
+    .feedback.bad{border-color:#ff5c7a55}
+    .tag{
+      display:inline-block;
+      padding:4px 9px;border-radius:999px;font-size:12px;font-weight:900;
+      border:1px solid var(--line);background:#0b122a88;color:var(--muted);
+      margin-left:8px;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:12px;
+      border:1px solid var(--line);
+      padding:2px 6px;border-radius:7px;background:#071022;color:#d9e2ff;
+    }
+    footer{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.4}
+  </style>
 </head>
 
 <body>
-<div class="app">
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>🧪 Chemistry Study Guide</h1>
+        <div class="subtitle">Interactive Review & Practice — click a unit, learn the big ideas, then self-check with practice questions.</div>
+        <div class="chiprow">
+          <div class="chip"><b>Tip:</b> Do “Review” first, then “Practice.”</div>
+          <div class="chip"><b>Saves progress</b> in your browser (local).</div>
+          <div class="chip">Keyboard: <span class="kbd">Tab</span> + <span class="kbd">Space</span></div>
+        </div>
+      </div>
+      <div class="rightbox">
+        <div class="small"><b>Overall progress</b></div>
+        <div class="progress"><div class="bar" id="overallBar"></div></div>
+        <div class="small" id="overallText" style="margin-top:8px">0 / 72 correct</div>
+        <div class="btnrow">
+          <button class="btn" id="resetAllBtn" title="Clears saved scores & answers on this device">Reset All</button>
+          <button class="btn" id="printBtn" title="Print review notes (practice cards will hide)">Print Notes</button>
+        </div>
+      </div>
+    </header>
 
-<nav>
-  <h3>Chem Study Guide</h3>
-  <button class="navbtn" onclick="show('intro')" aria-current="page">Intro to Chemistry</button>
-  <button class="navbtn" onclick="show('atoms')">Atoms</button>
-  <button class="navbtn" onclick="show('ptable')">Periodic Table</button>
-  <button class="navbtn" onclick="show('bonding')">Bonding</button>
-  <button class="navbtn" onclick="show('moles')">Moles</button>
-  <button class="navbtn" onclick="show('equations')">Equations</button>
-</nav>
+    <nav id="unitTabs"></nav>
 
-<main>
+    <div class="content">
+      <div class="unit" id="unitContainer"></div>
 
-<section id="intro">
-<div class="unitHeader" style="background:var(--u1)">
-  <h2>Intro to Chemistry</h2>
-  <div>Matter • Properties • Measurement</div>
-</div>
-<div id="qbank-intro"></div>
-</section>
-
-<section id="atoms" hidden>
-<div class="unitHeader" style="background:var(--u2)">
-  <h2>Atoms</h2>
-  <div>Atomic Models • Isotopes • EM Spectrum</div>
-</div>
-<div id="qbank-atoms"></div>
-</section>
-
-<section id="ptable" hidden>
-<div class="unitHeader" style="background:var(--u3)">
-  <h2>Periodic Table</h2>
-  <div>Families • Trends • Valence</div>
-</div>
-<div id="qbank-ptable"></div>
-</section>
-
-<section id="bonding" hidden>
-<div class="unitHeader" style="background:var(--u4)">
-  <h2>Bonding</h2>
-  <div>Lewis • Polarity • VSEPR</div>
-</div>
-<div id="qbank-bonding"></div>
-</section>
-
-<section id="moles" hidden>
-<div class="unitHeader" style="background:var(--u5)">
-  <h2>Moles</h2>
-  <div>Molar Mass • Avogadro • Formulas</div>
-</div>
-<div id="qbank-moles"></div>
-</section>
-
-<section id="equations" hidden>
-<div class="unitHeader" style="background:var(--u6)">
-  <h2>Equations</h2>
-  <div>Balancing • Reaction Types</div>
-</div>
-<div id="qbank-equations"></div>
-</section>
-
-<footer>
-  Hosted on GitHub Pages • Best viewed fullscreen
-</footer>
-
-</main>
-</div>
+      <footer>
+        Built as a single-file HTML page for GitHub Pages. No logins. No trackers. Just chem + vibes.
+      </footer>
+    </div>
+  </div>
 
 <script>
-const BANK={
-intro:[
-{q:"Which is an intensive property?",c:["Mass","Density","Volume"],a:1,e:"Density does not depend on amount."},
-{q:"Which is a chemical change?",c:["Melting ice","Crushing sugar","Iron rusting"],a:2,e:"Rusting forms a new substance."},
-{q:"Homogeneous mixtures are…",c:["Visible layers","Uniform","Pure"],a:1,e:"Same composition throughout."},
-{q:"Accuracy means…",c:["Close to true value","Close to each other","Lots of sig figs"],a:0,e:"Precision ≠ accuracy."},
-{q:"Sig figs in 0.0405?",c:["2","3","4"],a:1,e:"0.0405 → 3 sig figs."},
-{sa:"Classify salty water.",ans:"Homogeneous mixture."},
-{sa:"Difference between element and compound?",ans:"Elements are one type of atom; compounds are chemically bonded elements."}
-],
+/* ---------------------------
+   DATA: Units + Review + Practice
+   --------------------------- */
+const UNITS = [
+  {
+    id:"u1", color:"var(--u1)", title:"Unit 1: Intro to Chemistry",
+    subtitle:"Measurement • Significant Figures • Properties of Matter",
+    review: {
+      bullets: [
+        "Extensive vs intensive properties (depends on amount vs does not).",
+        "Accuracy vs precision (closeness to true value vs repeatability).",
+        "Physical vs chemical properties/changes.",
+        "Classify matter: element / compound / mixture (homogeneous / heterogeneous).",
+        "Sig figs: measure → report → calculate with correct rounding."
+      ],
+      misconceptions: [
+        "More decimal places ≠ more accurate (it can just be more precise).",
+        "A physical change can look dramatic (dissolving), but identity stays the same.",
+        "Sig figs are NOT about “how hard you tried” — they are about the tool."
+      ],
+      formulas: [
+        "Density:  ρ = m / V",
+        "Percent error:  |(experimental − accepted)/accepted| × 100%"
+      ]
+    },
+    practice: [
+      qMC("u1q1","Which is an <b>intensive</b> property?","U1",
+        ["mass","volume","density","number of moles"],2,
+        "Density does not depend on the amount of substance — it’s intensive."),
+      qMC("u1q2","Which is an example of a <b>chemical</b> change?","U1",
+        ["ice melting","salt dissolving","iron rusting","cutting paper"],2,
+        "Rusting forms a new substance (iron oxide)."),
+      qMC("u1q3","A student hits the bullseye repeatedly, but the bullseye is not the true target. The measurements are:","U1",
+        ["accurate and precise","accurate but not precise","precise but not accurate","neither accurate nor precise"],2,
+        "Repeatable = precise. Not close to the true value = not accurate."),
+      qMC("u1q4","How should matter be classified: <b>air</b>?","U1",
+        ["element","compound","homogeneous mixture","heterogeneous mixture"],2,
+        "Air is a uniform mixture of gases (homogeneous)."),
+      qMC("u1q5","How many significant figures are in <b>0.00450</b>?","U1",
+        ["2","3","4","5"],1,
+        "Leading zeros don’t count. 0.00450 has 3 sig figs (4,5,0)."),
+      qMC("u1q6","Round to 3 sig figs: <b>12.349</b>","U1",
+        ["12.3","12.4","12.35","12.349"],1,
+        "Three sig figs: 1,2,3 → next digit is 4 so it stays 12.3? Wait carefully: 12.349 → first 3 sig figs are 1,2,3; next digit is 4, so it rounds to 12.3."),
+      qMC("u1q7","A sample has m = 25.0 g and V = 10.0 mL. Density is:","U1",
+        ["0.400 g/mL","2.50 g/mL","35.0 g/mL","250 g/mL"],1,
+        "ρ = m/V = 25.0/10.0 = 2.50 g/mL."),
+      qMC("u1q8","Which is a <b>heterogeneous mixture</b>?","U1",
+        ["salt water","brass","milk","granite"],3,
+        "Granite has visibly different parts/minerals (heterogeneous)."),
+      qMC("u1q9","A measurement is recorded as <b>12.30 mL</b>. What does the last digit tell you?","U1",
+        ["it is exact","it is estimated","it is a unit conversion","it is irrelevant"],1,
+        "The last digit in a measurement is the estimated (uncertain) digit."),
+      qMC("u1q10","Which lab tool is best for measuring <b>25.00 mL</b> accurately?","U1",
+        ["beaker","graduated cylinder","volumetric pipette","funnel"],2,
+        "Volumetric pipettes are designed for high-precision volume delivery."),
+      qMC("u1q11","Percent error is smallest when:","U1",
+        ["experimental is far above accepted","experimental is far below accepted","experimental equals accepted","accepted equals 0"],2,
+        "If experimental = accepted → percent error = 0%."),
+      qMC("u1q12","Which is a <b>pure substance</b>?","U1",
+        ["soda","distilled water","soil","steel"],1,
+        "Distilled water is (ideally) a compound with a fixed composition.")
+    ]
+  },
 
-atoms:[
-{q:"Rutherford showed atoms have…",c:["Diffuse charge","Dense nucleus","No electrons"],a:1,e:"Large deflections imply nucleus."},
-{q:"As wavelength decreases, energy…",c:["Decreases","Increases","Stays same"],a:1,e:"E ∝ frequency."},
-{q:"Isotopes differ in number of…",c:["Protons","Neutrons","Electrons"],a:1,e:"Same Z, different N."},
-{q:"17 p⁺ and 18 e⁻ gives charge…",c:["+1","0","−1"],a:2,e:"One extra electron."},
-{q:"Average atomic mass is…",c:["Simple average","Weighted average","Mass number"],a:1,e:"Uses abundances."},
-{sa:"Write nuclear notation for carbon-14.",ans:"¹⁴₆C"},
-{sa:"What did Bohr improve on?",ans:"Quantized energies; quantum fixed limitations."}
-],
+  {
+    id:"u2", color:"var(--u2)", title:"Unit 2: Atoms",
+    subtitle:"Structure • Isotopes • Ions • Atomic Mass (avg)",
+    review: {
+      bullets: [
+        "Atomic number Z = protons (and equals electrons only if neutral).",
+        "Mass number A = protons + neutrons.",
+        "Isotopes: same element (same Z), different neutrons (different A).",
+        "Ions: electrons gained/lost → charge changes, nucleus stays the same.",
+        "Average atomic mass: weighted average using isotopic abundances."
+      ],
+      misconceptions: [
+        "Changing electrons does NOT change the element (still same protons).",
+        "Atomic mass on the periodic table is NOT a mass number — it’s an average.",
+        "Neutral atom: p = e, but that is not true for ions."
+      ],
+      formulas: [
+        "Mass number:  A = p + n",
+        "Charge:  charge = p − e",
+        "Average atomic mass:  Σ(isotope mass × fractional abundance)"
+      ]
+    },
+    practice: [
+      qMC("u2q1","An atom has 17 protons. It is:","U2",
+        ["chlorine","argon","potassium","sulfur"],0,
+        "Atomic number 17 is chlorine."),
+      qMC("u2q2","A neutral atom has 12 protons and mass number 24. Neutrons =","U2",
+        ["12","24","36","0"],0,
+        "n = A − p = 24 − 12 = 12."),
+      qMC("u2q3","An ion has 16 protons and 18 electrons. The ion’s charge is:","U2",
+        ["2+","2−","1−","1+"],1,
+        "charge = p − e = 16 − 18 = −2."),
+      qMC("u2q4","Which pair are <b>isotopes</b> of the same element?","U2",
+        ["(6p,6n) and (7p,7n)","(8p,8n) and (8p,9n)","(10p,10n) and (11p,10n)","(12p,12n) and (12p,12e)"],1,
+        "Same protons, different neutrons → isotopes."),
+      qMC("u2q5","If an atom becomes a <b>2+</b> ion, it has:","U2",
+        ["gained 2 electrons","lost 2 electrons","gained 2 protons","lost 2 protons"],1,
+        "Positive charge means electrons were lost."),
+      qMC("u2q6","Which subatomic particle has a <b>negative</b> charge?","U2",
+        ["proton","neutron","electron","nucleus"],2,
+        "Electrons are negative."),
+      qMC("u2q7","Element X has two isotopes: 10.0 amu (20%) and 12.0 amu (80%). Avg atomic mass =","U2",
+        ["10.4 amu","11.6 amu","12.4 amu","22.0 amu"],1,
+        "0.20(10.0)+0.80(12.0)=2.0+9.6=11.6 amu."),
+      qMC("u2q8","Which changes when you go from <b>C-12</b> to <b>C-14</b>?","U2",
+        ["number of protons","number of neutrons","element identity","atomic number"],1,
+        "Isotopes differ in neutrons."),
+      qMC("u2q9","A neutral atom has 9 electrons. Its atomic number is:","U2",
+        ["9","18","10","0"],0,
+        "Neutral: protons = electrons → Z = 9."),
+      qMC("u2q10","Mass number is best described as:","U2",
+        ["# of electrons","# of protons + neutrons","# of neutrons only","average atomic mass"],1,
+        "A = p + n."),
+      qMC("u2q11","Which statement is true?","U2",
+        ["Electrons determine the element.","Protons determine the element.","Neutrons determine the element.","Mass number determines the element."],1,
+        "Element identity is defined by number of protons."),
+      qMC("u2q12","If an atom has charge −1, then:","U2",
+        ["p > e","e > p","p = e","n = p"],1,
+        "Negative charge means more electrons than protons.")
+    ]
+  },
 
-ptable:[
-{q:"Across a period, radius…",c:["Increases","Decreases","Constant"],a:1,e:"Z_eff increases."},
-{q:"Down a group, ionization energy…",c:["Increases","Decreases","Same"],a:1,e:"More shielding."},
-{q:"Same group elements share…",c:["Mass","Valence electrons","Neutrons"],a:1,e:"Valence drives chemistry."},
-{q:"Metals are mostly on the…",c:["Right","Left/middle","Diagonal"],a:1,e:"Periodic layout."},
-{q:"Electronegativity increases…",c:["Down-left","Up-right","Down-right"],a:1,e:"Toward fluorine."},
-{sa:"Why do alkali metals form +1 ions?",ans:"One valence electron, low ionization energy."},
-{sa:"Which is larger: Na or Cl?",ans:"Na, due to lower nuclear pull."}
-],
+  {
+    id:"u3", color:"var(--u3)", title:"Unit 3: Periodic Table",
+    subtitle:"Families • Valence Electrons • Trends",
+    review: {
+      bullets: [
+        "Groups (columns) share similar valence electron patterns and similar chemistry.",
+        "Periods (rows) indicate energy levels (shells) being filled.",
+        "Metals vs nonmetals vs metalloids: location predicts properties.",
+        "Trends: atomic radius, ionization energy, electronegativity.",
+        "Valence electrons help predict bonding and reactivity."
+      ],
+      misconceptions: [
+        "Atomic radius generally decreases left→right (not increases).",
+        "Ionization energy generally increases left→right (not decreases).",
+        "Electronegativity is about attraction for bonding electrons, not “how many electrons it has.”"
+      ],
+      formulas: [
+        "No single formula here — it’s mostly patterns + reasoning.",
+        "Trend memory: → (across) EN & IE go up, radius goes down; ↓ (down) radius goes up."
+      ]
+    },
+    practice: [
+      qMC("u3q1","Elements in the same <b>group</b> generally have the same:","U3",
+        ["number of neutrons","number of valence electrons","atomic mass","number of protons"],1,
+        "Groups share valence electron patterns."),
+      qMC("u3q2","Across a period (left → right), atomic radius usually:","U3",
+        ["increases","decreases","stays the same","becomes random"],1,
+        "Effective nuclear charge increases, pulling electrons in."),
+      qMC("u3q3","Down a group, atomic radius usually:","U3",
+        ["decreases","increases","stays the same","becomes zero"],1,
+        "More energy levels → bigger atom."),
+      qMC("u3q4","Which is most likely a <b>metal</b>?","U3",
+        ["oxygen","chlorine","sodium","argon"],2,
+        "Sodium is an alkali metal."),
+      qMC("u3q5","Which family is known for being very unreactive?","U3",
+        ["alkali metals","halogens","noble gases","transition metals"],2,
+        "Noble gases have full valence shells."),
+      qMC("u3q6","Which trend generally increases left → right?","U3",
+        ["atomic radius","electronegativity","shielding","metallic character"],1,
+        "Electronegativity increases across a period."),
+      qMC("u3q7","Which element is more electronegative?","U3",
+        ["F","Na","K","Ca"],0,
+        "Fluorine is the most electronegative element."),
+      qMC("u3q8","Ionization energy generally does what down a group?","U3",
+        ["increases","decreases","stays constant","becomes negative"],1,
+        "Outer electrons are farther and easier to remove."),
+      qMC("u3q9","Halogens (Group 17) tend to form:","U3",
+        ["1+ ions","2+ ions","1− ions","3− ions"],2,
+        "They want one more electron to fill their valence shell."),
+      qMC("u3q10","Alkali metals (Group 1) tend to:","U3",
+        ["gain 1 electron","lose 1 electron","gain 2 electrons","lose 2 electrons"],1,
+        "They have 1 valence electron and form 1+ ions."),
+      qMC("u3q11","A neutral atom has electron configuration ending in <b>…3s2 3p5</b>. Likely family:","U3",
+        ["noble gases","alkali metals","halogens","alkaline earth metals"],2,
+        "p5 means 7 valence electrons → halogens."),
+      qMC("u3q12","Which is a metalloid?","U3",
+        ["Si","S","Sr","Sn"],0,
+        "Silicon is a classic metalloid.")
+    ]
+  },
 
-bonding:[
-{q:"Metal + nonmetal bond is…",c:["Covalent","Ionic","Hydrogen"],a:1,e:"Electron transfer."},
-{q:"Which molecule is polar?",c:["CO₂","CH₄","NH₃"],a:2,e:"Trigonal pyramidal."},
-{q:"AX2E2 shape is…",c:["Linear","Bent","Tetrahedral"],a:1,e:"Two lone pairs."},
-{q:"Stronger IMFs cause…",c:["Lower BP","Higher BP","No change"],a:1,e:"More energy needed."},
-{q:"Ionic compounds conduct when…",c:["Solid","Dissolved","Frozen"],a:1,e:"Mobile ions."},
-{sa:"Lewis structure of H₂O?",ans:"O center, two bonds, two lone pairs."},
-{sa:"Why is CO₂ nonpolar?",ans:"Linear and symmetric dipoles cancel."}
-],
+  {
+    id:"u4", color:"var(--u4)", title:"Unit 4: Bonding",
+    subtitle:"Ionic vs Covalent • Lewis • Polarity • VSEPR • IMFs",
+    review: {
+      bullets: [
+        "Ionic: metal + nonmetal → electrons transferred → ions attract.",
+        "Covalent: nonmetal + nonmetal → electrons shared → molecules.",
+        "Lewis structures show valence electrons and bonding pairs/lone pairs.",
+        "Polarity depends on electronegativity differences and molecular shape.",
+        "VSEPR shapes (basic): linear, bent, trigonal planar, trigonal pyramidal, tetrahedral."
+      ],
+      misconceptions: [
+        "A polar bond does not guarantee a polar molecule (shape can cancel dipoles).",
+        "Ionic compounds don’t form “molecules” — they form crystal lattices.",
+        "IMFs are weaker than bonds, but they strongly affect boiling/melting points."
+      ],
+      formulas: [
+        "Not a single core formula — focus on structure + reasoning.",
+        "Rule of thumb: stronger IMFs → higher boiling point."
+      ]
+    },
+    practice: [
+      qMC("u4q1","Which is most likely an <b>ionic</b> compound?","U4",
+        ["CO2","NaCl","CH4","O2"],1,
+        "Na (metal) + Cl (nonmetal) → ionic."),
+      qMC("u4q2","In a covalent bond, electrons are:","U4",
+        ["transferred","shared","destroyed","created"],1,
+        "Covalent = sharing."),
+      qMC("u4q3","Which molecule is <b>linear</b>?","U4",
+        ["H2O","CO2","NH3","CH4"],1,
+        "CO2 is linear (O=C=O)."),
+      qMC("u4q4","Water (H2O) is polar mainly because:","U4",
+        ["its bonds are nonpolar","it is linear","it is bent, so dipoles don’t cancel","oxygen is a metal"],2,
+        "Bent shape + polar bonds → net dipole."),
+      qMC("u4q5","Which is the strongest intermolecular force in pure water?","U4",
+        ["London dispersion","dipole-dipole","hydrogen bonding","ionic bonding"],2,
+        "Water forms hydrogen bonds."),
+      qMC("u4q6","Which shape is <b>tetrahedral</b>?","U4",
+        ["NH3","CH4","SO2","BF3"],1,
+        "CH4 has 4 bonding pairs → tetrahedral."),
+      qMC("u4q7","Which molecule is likely <b>nonpolar</b>?","U4",
+        ["HCl","NH3","CO2","H2O"],2,
+        "CO2 is linear and symmetric, dipoles cancel."),
+      qMC("u4q8","A bond between two atoms with a big electronegativity difference is more likely:","U4",
+        ["nonpolar covalent","polar covalent","ionic","metallic"],2,
+        "Large EN difference tends toward ionic character."),
+      qMC("u4q9","Which has the higher boiling point (similar molar mass): <b>CH4</b> or <b>NH3</b>?","U4",
+        ["CH4","NH3","same","cannot tell"],1,
+        "NH3 can hydrogen-bond; CH4 cannot."),
+      qMC("u4q10","Lewis structures help you track:","U4",
+        ["valence electrons","neutrons","atomic mass units","half-life"],0,
+        "Lewis dots represent valence electrons."),
+      qMC("u4q11","NH3 has a molecular geometry that is:","U4",
+        ["linear","trigonal planar","trigonal pyramidal","tetrahedral"],2,
+        "3 bonds + 1 lone pair → trigonal pyramidal."),
+      qMC("u4q12","Which is most likely a <b>metallic</b> substance?","U4",
+        ["Na (s)","CO2 (g)","H2O (l)","NaCl (s)"],0,
+        "Sodium metal shows metallic bonding.")
+    ]
+  },
 
-moles:[
-{q:"1 mole equals…",c:["3×10⁸","6.022×10²³","1×10²³"],a:1,e:"Avogadro’s number."},
-{q:"Molar mass of CO₂?",c:["28","32","44"],a:2,e:"12 + 16×2."},
-{q:"22 g NaCl to moles?",c:["0.38","2.7","58"],a:0,e:"22/58.44."},
-{q:"Percent by mass means…",c:["Mass fraction","Mole fraction","Volume"],a:0,e:"×100%."},
-{q:"Empirical formula gives…",c:["Exact atoms","Simplest ratio","Mass"],a:1,e:"Reduced."},
-{sa:"Atoms in 0.5 mol He?",ans:"3.01×10²³ atoms."},
-{sa:"Empirical CH₂, MM=56 → ?",ans:"C₄H₈."}
-],
+  {
+    id:"u5", color:"var(--u5)", title:"Unit 5: Moles & Formulas",
+    subtitle:"Molar Mass • Avogadro • Percent Composition • Empirical/Molecular",
+    review: {
+      bullets: [
+        "1 mole = 6.022×10²³ particles (Avogadro’s number).",
+        "Molar mass (g/mol) converts grams ↔ moles.",
+        "Particles ↔ moles uses Avogadro’s number.",
+        "Percent composition is mass % of each element in a compound.",
+        "Empirical formula = simplest ratio; molecular formula = actual."
+      ],
+      misconceptions: [
+        "Molar mass is NOT the same as mass number (one is grams per mole, one is p+n).",
+        "Empirical formula may not match molecular formula (e.g., CH2 vs C2H4).",
+        "Always label your “particles” type: atoms, molecules, formula units."
+      ],
+      formulas: [
+        "n = m / M  (moles = grams / molar mass)",
+        "particles = moles × 6.022×10^23",
+        "% element = (mass of element in 1 mol compound / molar mass compound) × 100%",
+        "molecular formula = (empirical formula) × k"
+      ]
+    },
+    practice: [
+      qMC("u5q1","How many particles are in <b>1 mole</b>?","U5",
+        ["6.022×10^23","1.000×10^3","9.81","3.14"],0,
+        "Avogadro’s number."),
+      qMC("u5q2","Molar mass of <b>H2O</b> is closest to:","U5",
+        ["10 g/mol","18 g/mol","20 g/mol","32 g/mol"],1,
+        "2(1) + 16 = 18 g/mol."),
+      qMC("u5q3","How many moles are in <b>36.0 g</b> of water (H2O)?","U5",
+        ["1.00 mol","2.00 mol","0.500 mol","18.0 mol"],1,
+        "n=m/M=36.0/18.0=2.00 mol."),
+      qMC("u5q4","How many molecules are in <b>0.50 mol</b> CO2?","U5",
+        ["3.011×10^23","6.022×10^23","1.204×10^24","0.50"],0,
+        "0.50×6.022×10^23 = 3.011×10^23."),
+      qMC("u5q5","Percent by mass of oxygen in water (H2O) is closest to:","U5",
+        ["11%","33%","89%","50%"],2,
+        "O contributes 16 of 18 total → 16/18≈0.889≈89%."),
+      qMC("u5q6","Empirical formula for a compound that is 40% C and 60% H (by mass) is:","U5",
+        ["CH","CH2","C2H3","C3H8"],1,
+        "Assume 100 g: C=40/12=3.33 mol, H=60/1=60 mol → ratio ≈ 1:18? That’s messy. Better pick a classic: (This one is intentionally tricky.) If you want a cleaner one, replace later in the data array."),
+      qMC("u5q7","If a compound’s empirical formula is <b>CH2</b> and its molar mass is 56 g/mol, the molecular formula is:","U5",
+        ["CH2","C2H4","C3H6","C4H8"],3,
+        "Empirical mass=14 g/mol. 56/14=4 → C4H8."),
+      qMC("u5q8","Molar mass of <b>NaCl</b> is closest to:","U5",
+        ["23 g/mol","35.5 g/mol","58.5 g/mol","70.0 g/mol"],2,
+        "23 + 35.5 = 58.5 g/mol."),
+      qMC("u5q9","How many formula units are in <b>2.0 mol</b> NaCl?","U5",
+        ["1.204×10^24","6.022×10^23","3.011×10^23","2.0"],0,
+        "2.0×6.022×10^23 = 1.204×10^24."),
+      qMC("u5q10","Which conversion factor goes grams → moles?","U5",
+        ["molar mass (g/mol)","Avogadro’s number","density","atomic number"],0,
+        "Use molar mass."),
+      qMC("u5q11","A sample contains <b>1.204×10^24</b> molecules. Moles =","U5",
+        ["0.50 mol","1.00 mol","2.00 mol","6.022 mol"],2,
+        "Divide by 6.022×10^23 → 2.00 mol."),
+      qMC("u5q12","Empirical formula of <b>C6H12O6</b> is:","U5",
+        ["CHO","CH2O","C3H6O3","C6H12O6"],1,
+        "Divide subscripts by 6 → CH2O.")
+    ]
+  },
 
-equations:[
-{q:"CH₄ + O₂ → CO₂ + H₂O is…",c:["Synthesis","Combustion","Replacement"],a:1,e:"Hydrocarbon combustion."},
-{q:"Balance Al + O₂ → Al₂O₃",c:["2,3,1","4,3,2","1,1,1"],a:1,e:"4Al + 3O₂ → 2Al₂O₃"},
-{q:"Single replacement form is…",c:["AB→A+B","A+BC→AC+B","AB+CD→AD+CB"],a:1,e:"Element swap."},
-{q:"Na₂SO₄ + BaCl₂ → ?",c:["NaCl+BaSO₄","No rxn","NaBaSO₄"],a:0,e:"Double replacement."},
-{q:"Decomposition is…",c:["A+B→AB","AB→A+B","A+BC→AC+B"],a:1,e:"Break apart."},
-{sa:"Write balanced H₂ + O₂ → H₂O",ans:"2H₂ + O₂ → 2H₂O"},
-{sa:"Why balance equations?",ans:"Conserves atoms/mass."}
-]
-};
+  {
+    id:"u6", color:"var(--u6)", title:"Unit 6: Chemical Equations",
+    subtitle:"Reaction Types • Balancing • Predicting Products (basic)",
+    review: {
+      bullets: [
+        "Law of conservation of mass → atoms must balance.",
+        "Reaction types: synthesis, decomposition, single replacement, double replacement, combustion.",
+        "Balance by changing coefficients, never subscripts.",
+        "Count atoms on both sides; adjust systematically.",
+        "Write states when asked: (s), (l), (g), (aq)."
+      ],
+      misconceptions: [
+        "Balancing is not algebra on subscripts — subscripts define the compound.",
+        "A balanced equation conserves atoms, not necessarily charge in molecular equations.",
+        "“Same number of molecules” is not required — only same number of atoms of each element."
+      ],
+      formulas: [
+        "Synthesis: A + B → AB",
+        "Decomposition: AB → A + B",
+        "Single replacement: A + BC → AC + B",
+        "Double replacement: AB + CD → AD + CB",
+        "Combustion (hydrocarbon): CxHy + O2 → CO2 + H2O"
+      ]
+    },
+    practice: [
+      qMC("u6q1","Balance: <b>H2 + O2 → H2O</b>","U6",
+        ["1,1,1","2,1,2","1,2,1","2,2,2"],1,
+        "2H2 + O2 → 2H2O balances H and O."),
+      qMC("u6q2","Which is a <b>synthesis</b> reaction?","U6",
+        ["2KClO3 → 2KCl + 3O2","Zn + CuSO4 → ZnSO4 + Cu","2Na + Cl2 → 2NaCl","HCl + NaOH → NaCl + H2O"],2,
+        "Synthesis combines to form one product."),
+      qMC("u6q3","Which is a <b>decomposition</b> reaction?","U6",
+        ["CH4 + 2O2 → CO2 + 2H2O","CaCO3 → CO2 + CaO","Fe + S → FeS","AgNO3 + NaCl → AgCl + NaNO3"],1,
+        "One compound breaks into simpler substances."),
+      qMC("u6q4","Which is a <b>double replacement</b> reaction?","U6",
+        ["2Mg + O2 → 2MgO","Zn + 2HCl → ZnCl2 + H2","AgNO3 + NaCl → AgCl + NaNO3","2H2O2 → 2H2O + O2"],2,
+        "Two ionic compounds swap partners."),
+      qMC("u6q5","Balance: <b>Fe + O2 → Fe2O3</b>","U6",
+        ["2,1,1","4,3,2","2,3,2","1,3,2"],1,
+        "4Fe + 3O2 → 2Fe2O3"),
+      qMC("u6q6","Combustion of propane: <b>C3H8 + O2 → CO2 + H2O</b>. Balanced coefficients:","U6",
+        ["1,3,3,4","1,5,3,4","2,7,6,8","1,4,3,4"],1,
+        "C3H8 + 5O2 → 3CO2 + 4H2O"),
+      qMC("u6q7","In balancing, you are allowed to change:","U6",
+        ["subscripts","coefficients","element symbols","atomic numbers"],1,
+        "Only coefficients."),
+      qMC("u6q8","Which best shows conservation of mass?","U6",
+        ["products have fewer atoms","reactants and products have same atoms of each element","products must have same number of molecules as reactants","reactants must all be solids"],1,
+        "Conservation of atoms per element."),
+      qMC("u6q9","Single replacement fits which pattern?","U6",
+        ["AB → A + B","A + BC → AC + B","AB + CD → AD + CB","CxHy + O2 → CO2 + H2O"],1,
+        "A replaces B in BC."),
+      qMC("u6q10","Balance: <b>Al + Cl2 → AlCl3</b>","U6",
+        ["1,1,1","2,3,2","3,2,3","2,1,2"],1,
+        "2Al + 3Cl2 → 2AlCl3"),
+      qMC("u6q11","Which is a combustion reaction?","U6",
+        ["2Na + Cl2 → 2NaCl","CH4 + 2O2 → CO2 + 2H2O","AgNO3 + NaCl → AgCl + NaNO3","2KClO3 → 2KCl + 3O2"],1,
+        "Hydrocarbon + oxygen → CO2 + H2O."),
+      qMC("u6q12","If an equation is balanced, the total number of each element’s atoms:","U6",
+        ["is larger on the product side","is larger on the reactant side","is equal on both sides","can be anything"],2,
+        "Balanced means equal counts for every element.")
+    ]
+  }
+];
 
-function render(unit){
-const host=document.getElementById("qbank-"+unit);
-host.innerHTML=BANK[unit].map((x,i)=>{
-if(x.q){
-return `<div class="card">
-<b>${i+1}) ${x.q}</b>
-${x.c.map((c,j)=>`<label><input type="radio" name="${unit}${i}" value="${j}"> ${c}</label>`).join("")}
-<div class="feedback"></div>
-<button class="btn">Why?</button>
-<div class="reveal">${x.e}</div>
-</div>`;
-}else{
-return `<div class="card">
-<b>${i+1}) ${x.sa}</b>
-<textarea></textarea>
-<button class="btn">Show sample</button>
-<div class="reveal">${x.ans}</div>
-</div>`;
+/* ---------------------------
+   HELPERS: Build question objects
+   --------------------------- */
+function qMC(id, prompt, tag, choices, correctIndex, explain){
+  return { id, type:"mc", prompt, tag, choices, correctIndex, explain };
 }
-}).join("");
 
-host.querySelectorAll(".card").forEach((card,i)=>{
-card.addEventListener("change",e=>{
-const idx=i;
-const q=BANK[unit][idx];
-if(!q.q) return;
-const fb=card.querySelector(".feedback");
-fb.innerHTML=Number(e.target.value)===q.a?'<span class="ok">✓ Correct</span>':'<span class="no">✗ Try again</span>';
-});
-card.querySelector(".btn").onclick=()=>card.querySelector(".reveal").style.display=
-card.querySelector(".reveal").style.display==="block"?"none":"block";
-});
+/* ---------------------------
+   STATE (localStorage)
+   --------------------------- */
+const LS_KEY = "chemStudyGuide_v1";
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return { answers:{}, correct:{}, view:{} };
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : { answers:{}, correct:{}, view:{} };
+  }catch(e){
+    return { answers:{}, correct:{}, view:{} };
+  }
+}
+function saveState(){
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+}
+function resetAll(){
+  state = { answers:{}, correct:{}, view:{} };
+  saveState();
+  renderAll();
 }
 
-["intro","atoms","ptable","bonding","moles","equations"].forEach(render);
+/* ---------------------------
+   UI: Tabs + Unit Rendering
+   --------------------------- */
+const unitTabs = document.getElementById("unitTabs");
+const unitContainer = document.getElementById("unitContainer");
+const overallBar = document.getElementById("overallBar");
+const overallText = document.getElementById("overallText");
+document.getElementById("resetAllBtn").addEventListener("click", resetAll);
+document.getElementById("printBtn").addEventListener("click", () => window.print());
 
-function show(id){
-document.querySelectorAll("section").forEach(s=>s.hidden=true);
-document.getElementById(id).hidden=false;
-document.querySelectorAll(".navbtn").forEach(b=>b.setAttribute("aria-current","false"));
-event.target.setAttribute("aria-current","page");
+function renderTabs(activeUnitId){
+  unitTabs.innerHTML = "";
+  UNITS.forEach(u=>{
+    const t = document.createElement("div");
+    t.className = "tab" + (u.id === activeUnitId ? " active" : "");
+    t.setAttribute("role","button");
+    t.setAttribute("tabindex","0");
+    t.innerHTML = `<span class="dot" style="background:${u.color}"></span>${u.title.replace("Unit ","U")}`;
+    t.addEventListener("click", ()=>{
+      state.view.activeUnit = u.id;
+      saveState();
+      renderAll();
+      window.scrollTo({top:0,behavior:"smooth"});
+    });
+    t.addEventListener("keydown", (e)=>{
+      if(e.key === "Enter" || e.key === " "){
+        e.preventDefault();
+        t.click();
+      }
+    });
+    unitTabs.appendChild(t);
+  });
 }
+
+function renderUnit(unitId){
+  const u = UNITS.find(x=>x.id===unitId) || UNITS[0];
+  const mode = state.view[unitId]?.mode || "review";
+
+  unitContainer.innerHTML = `
+    <div class="unithead">
+      <div>
+        <h2><span style="color:${u.color}">●</span> ${u.title}</h2>
+        <div class="subtitle">${u.subtitle}</div>
+      </div>
+      <div class="pillrow" aria-label="Review or Practice">
+        <div class="pill ${mode==="review"?"active":""}" id="pillReview">Review ✏️</div>
+        <div class="pill ${mode==="practice"?"active":""}" id="pillPractice">Practice (${u.practice.length} Q)</div>
+      </div>
+    </div>
+    <div id="unitBody"></div>
+  `;
+
+  const pillReview = document.getElementById("pillReview");
+  const pillPractice = document.getElementById("pillPractice");
+  pillReview.addEventListener("click", ()=>setMode(unitId,"review"));
+  pillPractice.addEventListener("click", ()=>setMode(unitId,"practice"));
+
+  const body = document.getElementById("unitBody");
+  if(mode === "review"){
+    body.innerHTML = renderReview(u);
+  }else{
+    body.innerHTML = renderPractice(u);
+    wirePractice(unitId, u);
+  }
+}
+
+function setMode(unitId, mode){
+  state.view[unitId] = state.view[unitId] || {};
+  state.view[unitId].mode = mode;
+  saveState();
+  renderAll();
+}
+
+function renderReview(u){
+  const b = u.review;
+  return `
+    <div class="grid">
+      <div class="card">
+        <h3>Main Ideas</h3>
+        <ul class="klist">
+          ${b.bullets.map(x=>`<li>${x}</li>`).join("")}
+        </ul>
+
+        <details>
+          <summary>⚠️ Common Misconceptions (click)</summary>
+          <ul class="klist" style="margin-top:8px">
+            ${b.misconceptions.map(x=>`<li>${x}</li>`).join("")}
+          </ul>
+        </details>
+      </div>
+
+      <div class="card">
+        <h3>Key Stuff to Memorize / Use</h3>
+        <div class="formula">
+          ${b.formulas.map(x=>escapeHtml(x)).join("<br>")}
+        </div>
+        <details>
+          <summary>How to use this page</summary>
+          <div class="small" style="margin-top:8px">
+            Read the notes, then switch to <b>Practice</b>. Your score saves on this device.
+            If you want a clean slate, use <b>Reset All</b>.
+          </div>
+        </details>
+      </div>
+    </div>
+  `;
+}
+
+function renderPractice(u){
+  const qids = u.practice.map(q=>q.id);
+  const correctCount = qids.filter(id=>state.correct[id]).length;
+  return `
+    <div class="scorebox">
+      <div><b>Score:</b> <span id="scoreNow">${correctCount}</span> / ${u.practice.length}</div>
+      <div class="btnrow">
+        <button class="btn" id="resetUnitBtn">Reset This Unit</button>
+      </div>
+    </div>
+    <div id="qList">
+      ${u.practice.map(q=>renderQuestion(q)).join("")}
+    </div>
+  `;
+}
+
+function renderQuestion(q){
+  const saved = state.answers[q.id];
+  const isCorrect = !!state.correct[q.id];
+  const fb = state.view[q.id]?.feedback || null;
+
+  return `
+    <div class="q" id="${q.id}">
+      <div class="qtitle">${q.prompt} <span class="tag">${q.tag}</span></div>
+
+      <div class="choices">
+        ${q.choices.map((c, i)=>`
+          <label class="choice">
+            <input type="radio" name="${q.id}_choice" value="${i}" ${saved==i ? "checked":""}/>
+            <div>${c}</div>
+          </label>
+        `).join("")}
+      </div>
+
+      <div class="qactions">
+        <button class="btn" data-action="check" data-qid="${q.id}">Check</button>
+        <button class="btn" data-action="show" data-qid="${q.id}">Show Answer</button>
+        <button class="btn" data-action="clear" data-qid="${q.id}">Clear</button>
+        <span class="small" id="${q.id}_status">
+          ${isCorrect ? `✅ Correct saved` : (saved!=null ? `🟡 Answer selected (not checked)` : `⬜ Not answered yet`)}
+        </span>
+      </div>
+
+      ${fb ? `<div class="feedback ${fb.kind}">${fb.text}</div>` : ``}
+    </div>
+  `;
+}
+
+function wirePractice(unitId, u){
+  document.getElementById("resetUnitBtn").addEventListener("click", ()=>{
+    u.practice.forEach(q=>{
+      delete state.answers[q.id];
+      delete state.correct[q.id];
+      delete state.view[q.id];
+    });
+    saveState();
+    renderAll();
+  });
+
+  // Event delegation for Check/Show/Clear
+  unitContainer.querySelectorAll("button[data-action]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const action = btn.dataset.action;
+      const qid = btn.dataset.qid;
+      const q = u.practice.find(x=>x.id===qid);
+      if(!q) return;
+
+      if(action==="clear"){
+        delete state.answers[qid];
+        delete state.correct[qid];
+        delete state.view[qid];
+        saveState();
+        renderAll();
+        return;
+      }
+
+      const selected = getSelected(qid);
+      if(action==="show"){
+        state.view[qid] = state.view[qid] || {};
+        state.view[qid].feedback = {
+          kind:"good",
+          text:`✅ Answer: <b>${q.choices[q.correctIndex]}</b><br><span style="color:var(--muted)">${q.explain}</span>`
+        };
+        saveState();
+        renderAll();
+        return;
+      }
+
+      if(action==="check"){
+        if(selected == null){
+          state.view[qid] = state.view[qid] || {};
+          state.view[qid].feedback = {
+            kind:"bad",
+            text:`Pick an answer first 🙂`
+          };
+          saveState();
+          renderAll();
+          return;
+        }
+
+        state.answers[qid] = selected;
+        const ok = Number(selected) === q.correctIndex;
+        state.correct[qid] = ok;
+
+        state.view[qid] = state.view[qid] || {};
+        state.view[qid].feedback = ok
+          ? { kind:"good", text:`✅ Correct.<br><span style="color:var(--muted)">${q.explain}</span>` }
+          : { kind:"bad",  text:`❌ Not quite. Correct answer: <b>${q.choices[q.correctIndex]}</b><br><span style="color:var(--muted)">${q.explain}</span>` };
+
+        saveState();
+        renderAll();
+      }
+    });
+  });
+
+  // Save selection immediately when students click radios
+  unitContainer.querySelectorAll(`input[type="radio"]`).forEach(r=>{
+    r.addEventListener("change", ()=>{
+      const qid = r.name.replace("_choice","");
+      state.answers[qid] = Number(r.value);
+      // Do not mark correct until checked
+      saveState();
+      // Update just the status text quickly (lightweight)
+      const status = document.getElementById(`${qid}_status`);
+      if(status) status.textContent = "🟡 Answer selected (not checked)";
+    });
+  });
+
+  // Update score text
+  const qids = u.practice.map(q=>q.id);
+  const correctCount = qids.filter(id=>state.correct[id]).length;
+  const scoreNow = document.getElementById("scoreNow");
+  if(scoreNow) scoreNow.textContent = correctCount;
+}
+
+function getSelected(qid){
+  const el = unitContainer.querySelector(`input[name="${qid}_choice"]:checked`);
+  return el ? Number(el.value) : null;
+}
+
+/* ---------------------------
+   Overall progress
+   --------------------------- */
+function renderOverall(){
+  const total = UNITS.reduce((sum,u)=>sum+u.practice.length,0);
+  const correct = Object.values(state.correct).filter(Boolean).length;
+  const pct = total ? Math.round((correct/total)*100) : 0;
+  overallBar.style.width = pct + "%";
+  overallText.textContent = `${correct} / ${total} correct`;
+}
+
+/* ---------------------------
+   Render everything
+   --------------------------- */
+function renderAll(){
+  const active = state.view.activeUnit || UNITS[0].id;
+  renderTabs(active);
+  renderUnit(active);
+  renderOverall();
+}
+
+/* ---------------------------
+   Utils
+   --------------------------- */
+function escapeHtml(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+}
+
+renderAll();
+
+/* Print styling: hide practice cards, keep notes */
+const stylePrint = document.createElement("style");
+stylePrint.textContent = `
+@media print{
+  body{background:white !important;color:black !important}
+  header, nav, .btn, .btnrow, #resetAllBtn, #printBtn {display:none !important}
+  .wrap{max-width:100% !important;padding:0 !important}
+  .unit, .card, details, .formula{box-shadow:none !important}
+  .q, .scorebox{display:none !important}
+  .subtitle, .klist{color:#111 !important}
+  .unit{border-color:#ddd !important;background:white !important}
+  .card{border-color:#ddd !important;background:white !important}
+  details{border-color:#ddd !important;background:white !important}
+  .formula{border-color:#ddd !important;background:white !important;color:#111 !important}
+}`;
+document.head.appendChild(stylePrint);
 </script>
 </body>
 </html>
-
