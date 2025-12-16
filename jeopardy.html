@@ -18,8 +18,22 @@
   .controls{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .btn{border:1px solid var(--line);background:#fff;color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer}
   .btn:hover{border-color:#b9c6ff}
-  .score{font-weight:800}
+  .score{font-weight:900}
   main{max-width:1200px;margin:0 auto;padding:12px 16px 28px;}
+  .topGrid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:12px;}
+  @media (min-width:980px){ .topGrid{grid-template-columns: 1fr 420px;} }
+
+  /* Team panel */
+  .teamPanel{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 10px rgba(16,24,40,.06);padding:14px;}
+  .teamPanel h2{margin:0 0 10px 0;font-size:14px;color:var(--muted);letter-spacing:.2px}
+  .teamRow{display:flex;gap:10px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:14px;padding:10px 10px;margin:10px 0;background:#fff;}
+  .teamName{font-weight:900}
+  .teamScore{font-weight:900;font-size:18px}
+  .teamBtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  .teamBtns .btn{padding:6px 10px}
+  .small{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35}
+
+  /* Board */
   .board{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
   .cat{color:#fff;border-radius:14px;padding:12px;box-shadow:var(--shadow);font-weight:900;text-align:center;min-height:64px;display:flex;align-items:center;justify-content:center;}
   .cell{
@@ -34,7 +48,7 @@
 
   /* Modal */
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;}
-  .modal{width:min(760px,100%); background:#fff; border-radius:18px; border:1px solid var(--line); box-shadow:var(--shadow); overflow:hidden;}
+  .modal{width:min(860px,100%); background:#fff; border-radius:18px; border:1px solid var(--line); box-shadow:var(--shadow); overflow:hidden;}
   .mhead{padding:14px 16px; color:#fff; display:flex; gap:10px; align-items:center; justify-content:space-between;}
   .mhead .left{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
   .tag{font-weight:900}
@@ -42,31 +56,47 @@
   .close{background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.22); color:#fff; padding:6px 10px; border-radius:10px; cursor:pointer}
   .close:hover{background:rgba(255,255,255,.26)}
   .mbody{padding:16px;}
-  .qtext{font-size:18px; font-weight:800; line-height:1.35}
-  .sub{margin-top:8px; color:var(--muted); font-size:13px}
-  .reveal{display:none; margin-top:14px; padding:12px; border-left:4px solid #b9c6ff; background:#f3f6ff; border-radius:12px;}
-  .reveal b{display:block;margin-bottom:6px}
+
+  /* Bigger clue text */
+  .qtext{font-size:28px; font-weight:950; line-height:1.25;}
+  .sub{margin-top:10px; color:var(--muted); font-size:14px}
+  .reveal{display:none; margin-top:16px; padding:14px; border-left:4px solid #b9c6ff; background:#f3f6ff; border-radius:12px;}
+  .reveal b{display:block;margin-bottom:8px;font-size:14px}
+  .reveal .ans{font-size:22px;font-weight:900;line-height:1.25}
   .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:14px;}
-  .ok{color:#27ae60;font-weight:900}
-  .no{color:#e74c3c;font-weight:900}
   .note{color:var(--muted); font-size:12px}
+  .usedNote{color:var(--muted); font-size:12px; margin-top:10px; display:none;}
+  select{border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:#fff;}
 </style>
 </head>
 <body>
 
 <header>
   <h1>Chem Jeopardy Review</h1>
-  <span class="pill">Click a dollar value → answer → adjust score</span>
+  <span class="pill">Click a dollar value → reveal → award points to a team</span>
   <div class="controls">
-    <span class="pill">Score: <span class="score" id="score">0</span></span>
-    <button class="btn" id="reset">Reset board</button>
+    <span class="pill">Clue value: <span class="score" id="currentValue">$—</span></span>
+    <button class="btn" id="reset">Reset board & scores</button>
     <button class="btn" id="random">Random clue</button>
   </div>
 </header>
 
 <main>
-  <div class="board" id="board"></div>
-  <div class="hint">Teacher tip: This works great with teams. After revealing the answer, click “+” or “−” to adjust score.</div>
+  <div class="topGrid">
+    <div>
+      <div class="board" id="board"></div>
+      <div class="hint">Tip: The clue text is intentionally big for projecting. Teams are awarded points from the clue popup.</div>
+    </div>
+
+    <aside class="teamPanel">
+      <h2>Teams</h2>
+      <div id="teams"></div>
+      <div class="small">
+        Edit team names in the code: <code>TEAMS = ["A","B","C"]</code>.<br>
+        Scores save on this device/browser.
+      </div>
+    </aside>
+  </div>
 </main>
 
 <div class="overlay" id="overlay" role="dialog" aria-modal="true">
@@ -85,24 +115,30 @@
 
       <div class="row">
         <button class="btn" id="showAns">Reveal answer</button>
-        <span class="note">Then mark correct/incorrect:</span>
-        <button class="btn" id="plus">+ value</button>
-        <button class="btn" id="minus">− value</button>
+        <span class="note">Award points:</span>
+        <select id="teamSelect" aria-label="Team to award points">
+        </select>
+        <button class="btn" id="awardPlus">+ value</button>
+        <button class="btn" id="awardMinus">− value</button>
+        <button class="btn" id="markUsed">Mark used (no points)</button>
       </div>
 
       <div class="reveal" id="reveal">
         <b>Answer</b>
-        <div id="atext"></div>
+        <div class="ans" id="atext"></div>
       </div>
 
-      <div class="sub" id="locked" style="margin-top:10px; display:none;">
-        This clue is now marked used on the board.
-      </div>
+      <div class="usedNote" id="usedNote">This clue is now marked used on the board.</div>
     </div>
   </div>
 </div>
 
 <script>
+/* =========================
+   EDIT THESE TEAM NAMES
+========================= */
+const TEAMS = ["Team A", "Team B", "Team C", "Team D"];
+
 /* --------------------------
    DATA (6 categories x 5 values)
 -------------------------- */
@@ -137,25 +173,25 @@ const CLUES = {
     {q:"Down a group, ionization energy generally does what?", a:"Decreases."},
     {q:"Elements in the same group share similar chemistry because they share similar…", a:"Valence electron patterns."},
     {q:"Name the families: Group 1 and Group 17 are called what?", a:"Alkali metals; Halogens."},
-    {q:"Which trend increases toward the top-right corner of the table (toward F)?", a:"Electronegativity (also ionization energy generally increases up/right)."}
+    {q:"Which trend increases toward the top-right corner of the table (toward F)?", a:"Electronegativity (and ionization energy generally increases up/right)."}
   ],
   bond: [
     {q:"Bond type most likely between a metal and a nonmetal?", a:"Ionic bonding."},
     {q:"VSEPR: AX2E2 has what molecular shape?", a:"Bent (tetrahedral electron geometry)."},
-    {q:"Which is polar: CO2, CH4, or NH3?", a:"NH3 is polar."},
-    {q:"Name the forces between molecules: attraction between partial charges in polar molecules.", a:"Dipole–dipole forces (an intermolecular force)."},
+    {q:"Which is polar: CO₂, CH₄, or NH₃?", a:"NH₃ is polar."},
+    {q:"Name the IMF: attraction between partial charges in polar molecules.", a:"Dipole–dipole forces."},
     {q:"Why do ionic compounds conduct electricity in solution but not as solids?", a:"Ions are mobile in solution; locked in place in a solid lattice."}
   ],
   moles: [
-    {q:"How many particles are in 1 mole?", a:"6.022 × 10^23 particles (Avogadro’s number)."},
+    {q:"How many particles are in 1 mole?", a:"6.022 × 10²³ particles (Avogadro’s number)."},
     {q:"Convert: 22.0 g NaCl (58.44 g/mol) → moles (closest).", a:"≈ 0.376 mol."},
     {q:"Define percent composition.", a:"(mass of element ÷ total mass of compound) × 100%."},
     {q:"Empirical vs molecular formula: which is simplest whole-number ratio?", a:"Empirical formula."},
-    {q:"Empirical CH2, molar mass 56 g/mol → molecular formula?", a:"C4H8 (because 56/14 = 4)."}
+    {q:"Empirical CH₂, molar mass 56 g/mol → molecular formula?", a:"C₄H₈ (because 56/14 = 4)."}
   ],
   eq: [
-    {q:"Balance: __Al + __O2 → __Al2O3", a:"4Al + 3O2 → 2Al2O3."},
-    {q:"Classify: CH4 + 2O2 → CO2 + 2H2O", a:"Combustion."},
+    {q:"Balance: __Al + __O₂ → __Al₂O₃", a:"4Al + 3O₂ → 2Al₂O₃."},
+    {q:"Classify: CH₄ + 2O₂ → CO₂ + 2H₂O", a:"Combustion."},
     {q:"Reaction pattern: AB → A + B is called what?", a:"Decomposition."},
     {q:"Reaction pattern: A + BC → AC + B is called what?", a:"Single replacement (single displacement)."},
     {q:"Why do we balance equations?", a:"To obey conservation of atoms/mass (same number of each atom on both sides)."}
@@ -165,30 +201,84 @@ const CLUES = {
 /* --------------------------
    STATE
 -------------------------- */
-const KEY = "chemJeopV1";
+const KEY = "chemJeopTeamsV1";
 let state = JSON.parse(localStorage.getItem(KEY) || "{}");
-if (!state.used) state.used = {}; // used["cat-idx"]=true
-if (typeof state.score !== "number") state.score = 0;
+if (!state.used) state.used = {};               // used["cat-idx"]=true
+if (!state.teamScores) state.teamScores = {};  // {teamName:number}
+for (const t of TEAMS) if (typeof state.teamScores[t] !== "number") state.teamScores[t] = 0;
+if (!state.dd) state.dd = null;
 
 let currentClue = null; // {catId, idx, value, dd}
+
+/* --------------------------
+   HELPERS
+-------------------------- */
+function cellKey(catId, idx){ return `${catId}-${idx}`; }
+
+function pickDailyDouble(){
+  const all = [];
+  for (const cat of CATS) for (let i=0;i<5;i++) all.push({catId:cat.id, idx:i});
+  const unused = all.filter(x => !state.used[cellKey(x.catId, x.idx)]);
+  if (unused.length === 0) return null;
+  return unused[Math.floor(Math.random()*unused.length)];
+}
+
+function save(){
+  localStorage.setItem(KEY, JSON.stringify(state));
+}
+
+/* --------------------------
+   RENDER TEAMS
+-------------------------- */
+const teamsHost = document.getElementById("teams");
+const teamSelect = document.getElementById("teamSelect");
+
+function renderTeams(){
+  teamsHost.innerHTML = "";
+  teamSelect.innerHTML = "";
+
+  TEAMS.forEach((name, idx)=>{
+    // select option
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    teamSelect.appendChild(opt);
+
+    // row
+    const row = document.createElement("div");
+    row.className = "teamRow";
+
+    const left = document.createElement("div");
+    left.innerHTML = `<div class="teamName">${name}</div><div class="small">Score</div>`;
+
+    const mid = document.createElement("div");
+    mid.className = "teamScore";
+    mid.id = "ts-" + idx;
+    mid.textContent = state.teamScores[name];
+
+    const right = document.createElement("div");
+    right.className = "teamBtns";
+    const b1 = document.createElement("button"); b1.className="btn"; b1.textContent="+100";
+    const b2 = document.createElement("button"); b2.className="btn"; b2.textContent="-100";
+    const b3 = document.createElement("button"); b3.className="btn"; b3.textContent="Reset";
+
+    b1.addEventListener("click", ()=>{ state.teamScores[name]+=100; save(); renderTeams(); });
+    b2.addEventListener("click", ()=>{ state.teamScores[name]-=100; save(); renderTeams(); });
+    b3.addEventListener("click", ()=>{ state.teamScores[name]=0; save(); renderTeams(); });
+
+    right.appendChild(b1); right.appendChild(b2); right.appendChild(b3);
+
+    row.appendChild(left);
+    row.appendChild(mid);
+    row.appendChild(right);
+    teamsHost.appendChild(row);
+  });
+}
 
 /* --------------------------
    BUILD BOARD
 -------------------------- */
 const board = document.getElementById("board");
-
-function cellKey(catId, idx){ return `${catId}-${idx}`; }
-
-function pickDailyDouble(){
-  // choose one clue not yet used
-  const all = [];
-  for (const cat of CATS){
-    for (let i=0;i<5;i++) all.push({catId:cat.id, idx:i});
-  }
-  const unused = all.filter(x => !state.used[cellKey(x.catId, x.idx)]);
-  if (unused.length === 0) return null;
-  return unused[Math.floor(Math.random()*unused.length)];
-}
 
 function renderBoard(){
   board.innerHTML = "";
@@ -202,11 +292,10 @@ function renderBoard(){
     board.appendChild(el);
   }
 
-  // decide daily double (persist)
   if (!state.dd) state.dd = pickDailyDouble();
   const dd = state.dd;
 
-  // value rows
+  // clue cells
   for (let r=0;r<5;r++){
     for (const cat of CATS){
       const idx = r;
@@ -222,15 +311,15 @@ function renderBoard(){
 
       el.addEventListener("click", ()=>{
         if (state.used[k]) return;
-        openClue(cat.id, idx, value, dd && dd.catId===cat.id && dd.idx===idx);
+        const isDD = dd && dd.catId===cat.id && dd.idx===idx;
+        openClue(cat.id, idx, value, isDD);
       });
 
       board.appendChild(el);
     }
   }
 
-  document.getElementById("score").textContent = state.score;
-  localStorage.setItem(KEY, JSON.stringify(state));
+  save();
 }
 
 /* --------------------------
@@ -246,7 +335,8 @@ const qtext = document.getElementById("qtext");
 const qsub = document.getElementById("qsub");
 const reveal = document.getElementById("reveal");
 const atext = document.getElementById("atext");
-const locked = document.getElementById("locked");
+const usedNote = document.getElementById("usedNote");
+const currentValue = document.getElementById("currentValue");
 
 function openClue(catId, idx, value, isDD){
   const cat = CATS.find(c=>c.id===catId);
@@ -259,14 +349,16 @@ function openClue(catId, idx, value, isDD){
   mval.textContent = "$" + value;
   mdd.style.display = isDD ? "inline-block" : "none";
 
+  currentValue.textContent = "$" + value;
+
   qtext.textContent = clue.q;
   qsub.textContent = isDD
-    ? "Daily Double: teacher can set a custom wager if you want — or just use the listed value."
-    : "Discuss for ~20–30 seconds, then reveal.";
+    ? "Daily Double: you can use the listed value, or decide a custom wager verbally."
+    : "Give teams ~20–30 seconds, then reveal.";
 
   reveal.style.display = "none";
   atext.textContent = clue.a;
-  locked.style.display = "none";
+  usedNote.style.display = "none";
 
   overlay.style.display = "flex";
 }
@@ -274,6 +366,7 @@ function openClue(catId, idx, value, isDD){
 function closeClue(){
   overlay.style.display = "none";
   currentClue = null;
+  currentValue.textContent = "$—";
 }
 
 closeBtn.addEventListener("click", closeClue);
@@ -283,40 +376,48 @@ document.getElementById("showAns").addEventListener("click", ()=>{
   reveal.style.display = (reveal.style.display==="block") ? "none" : "block";
 });
 
-/* score + mark used */
-function markUsedAnd(delta){
+function markUsed(){
   if (!currentClue) return;
-  state.score += delta;
+  state.used[cellKey(currentClue.catId, currentClue.idx)] = true;
 
-  const k = cellKey(currentClue.catId, currentClue.idx);
-  state.used[k] = true;
-
-  // if daily double was used, pick a new one for remaining clues (optional)
+  // if used daily double, pick another for remaining clues
   if (state.dd && state.dd.catId===currentClue.catId && state.dd.idx===currentClue.idx){
     state.dd = pickDailyDouble();
   }
 
-  document.getElementById("score").textContent = state.score;
-  locked.style.display = "block";
-  localStorage.setItem(KEY, JSON.stringify(state));
+  usedNote.style.display = "block";
+  save();
   renderBoard();
 }
 
-document.getElementById("plus").addEventListener("click", ()=> markUsedAnd(+currentClue.value));
-document.getElementById("minus").addEventListener("click", ()=> markUsedAnd(-currentClue.value));
+function award(delta){
+  if (!currentClue) return;
+  const team = teamSelect.value;
+  state.teamScores[team] += delta;
+  markUsed();
+  renderTeams();
+}
+
+/* Buttons */
+document.getElementById("awardPlus").addEventListener("click", ()=> award(+currentClue.value));
+document.getElementById("awardMinus").addEventListener("click", ()=> award(-currentClue.value));
+document.getElementById("markUsed").addEventListener("click", markUsed);
 
 /* --------------------------
    CONTROLS
 -------------------------- */
 document.getElementById("reset").addEventListener("click", ()=>{
-  if (!confirm("Reset the board and score?")) return;
-  state = {score:0, used:{}, dd:null};
-  localStorage.setItem(KEY, JSON.stringify(state));
+  if (!confirm("Reset the board AND all team scores?")) return;
+  state.used = {};
+  state.dd = null;
+  for (const t of TEAMS) state.teamScores[t] = 0;
+  save();
+  renderTeams();
   renderBoard();
+  closeClue();
 });
 
 document.getElementById("random").addEventListener("click", ()=>{
-  // open a random unused clue
   const unused = [];
   for (const cat of CATS){
     for (let i=0;i<5;i++){
@@ -332,6 +433,7 @@ document.getElementById("random").addEventListener("click", ()=>{
 });
 
 /* init */
+renderTeams();
 renderBoard();
 </script>
 </body>
