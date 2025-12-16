@@ -18,20 +18,22 @@
   .controls{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .btn{border:1px solid var(--line);background:#fff;color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer}
   .btn:hover{border-color:#b9c6ff}
-  .score{font-weight:900}
   main{max-width:1200px;margin:0 auto;padding:12px 16px 28px;}
   .topGrid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:12px;}
-  @media (min-width:980px){ .topGrid{grid-template-columns: 1fr 420px;} }
+  @media (min-width:980px){ .topGrid{grid-template-columns: 1fr 440px;} }
 
   /* Team panel */
   .teamPanel{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 10px rgba(16,24,40,.06);padding:14px;}
   .teamPanel h2{margin:0 0 10px 0;font-size:14px;color:var(--muted);letter-spacing:.2px}
-  .teamRow{display:flex;gap:10px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:14px;padding:10px 10px;margin:10px 0;background:#fff;}
-  .teamName{font-weight:900}
-  .teamScore{font-weight:900;font-size:18px}
+  .teamRow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px;margin:10px 0;background:#fff;}
+  .teamTop{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .teamNameInput{width:190px; max-width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:10px;}
+  .teamScore{font-weight:950;font-size:18px; min-width:64px; text-align:right;}
   .teamBtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-  .teamBtns .btn{padding:6px 10px}
   .small{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .danger{border-color:#ffd6d6}
+  .danger:hover{border-color:#ff6b6b}
 
   /* Board */
   .board{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
@@ -48,7 +50,7 @@
 
   /* Modal */
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;}
-  .modal{width:min(860px,100%); background:#fff; border-radius:18px; border:1px solid var(--line); box-shadow:var(--shadow); overflow:hidden;}
+  .modal{width:min(900px,100%); background:#fff; border-radius:18px; border:1px solid var(--line); box-shadow:var(--shadow); overflow:hidden;}
   .mhead{padding:14px 16px; color:#fff; display:flex; gap:10px; align-items:center; justify-content:space-between;}
   .mhead .left{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
   .tag{font-weight:900}
@@ -58,14 +60,11 @@
   .mbody{padding:16px;}
 
   /* Bigger clue text */
-  .qtext{font-size:28px; font-weight:950; line-height:1.25;}
+  .qtext{font-size:32px; font-weight:950; line-height:1.2;}
   .sub{margin-top:10px; color:var(--muted); font-size:14px}
   .reveal{display:none; margin-top:16px; padding:14px; border-left:4px solid #b9c6ff; background:#f3f6ff; border-radius:12px;}
   .reveal b{display:block;margin-bottom:8px;font-size:14px}
   .reveal .ans{font-size:22px;font-weight:900;line-height:1.25}
-  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:14px;}
-  .note{color:var(--muted); font-size:12px}
-  .usedNote{color:var(--muted); font-size:12px; margin-top:10px; display:none;}
   select{border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:#fff;}
 </style>
 </head>
@@ -73,9 +72,8 @@
 
 <header>
   <h1>Chem Jeopardy Review</h1>
-  <span class="pill">Click a dollar value → reveal → award points to a team</span>
+  <span class="pill">Big clue text + team scoring</span>
   <div class="controls">
-    <span class="pill">Clue value: <span class="score" id="currentValue">$—</span></span>
     <button class="btn" id="reset">Reset board & scores</button>
     <button class="btn" id="random">Random clue</button>
   </div>
@@ -85,15 +83,21 @@
   <div class="topGrid">
     <div>
       <div class="board" id="board"></div>
-      <div class="hint">Tip: The clue text is intentionally big for projecting. Teams are awarded points from the clue popup.</div>
+      <div class="hint">Tip: Award points in the clue popup. “Mark used” works if no one gets it.</div>
     </div>
 
     <aside class="teamPanel">
       <h2>Teams</h2>
+
+      <div class="row">
+        <button class="btn" id="addTeam">+ Add team</button>
+      </div>
+
       <div id="teams"></div>
+
       <div class="small">
-        Edit team names in the code: <code>TEAMS = ["A","B","C"]</code>.<br>
-        Scores save on this device/browser.
+        Team names + scores save in this browser (localStorage).<br>
+        Rename a team by editing its name box.
       </div>
     </aside>
   </div>
@@ -113,35 +117,27 @@
       <div class="qtext" id="qtext"></div>
       <div class="sub" id="qsub"></div>
 
-      <div class="row">
+      <div class="row" style="margin-top:14px;">
         <button class="btn" id="showAns">Reveal answer</button>
-        <span class="note">Award points:</span>
-        <select id="teamSelect" aria-label="Team to award points">
-        </select>
+        <span class="sub" style="margin:0;">Award points:</span>
+        <select id="teamSelect"></select>
         <button class="btn" id="awardPlus">+ value</button>
         <button class="btn" id="awardMinus">− value</button>
-        <button class="btn" id="markUsed">Mark used (no points)</button>
+        <button class="btn" id="markUsed">Mark used</button>
       </div>
 
       <div class="reveal" id="reveal">
         <b>Answer</b>
         <div class="ans" id="atext"></div>
       </div>
-
-      <div class="usedNote" id="usedNote">This clue is now marked used on the board.</div>
     </div>
   </div>
 </div>
 
 <script>
 /* =========================
-   EDIT THESE TEAM NAMES
-========================= */
-const TEAMS = ["Team A", "Team B", "Team C", "Team D"];
-
-/* --------------------------
    DATA (6 categories x 5 values)
--------------------------- */
+========================= */
 const CATS = [
   { id:"intro",  name:"Intro to Chem",  color:"var(--u1)" },
   { id:"atoms",  name:"Atoms",          color:"var(--u2)" },
@@ -150,7 +146,6 @@ const CATS = [
   { id:"moles",  name:"Moles",          color:"var(--u5)" },
   { id:"eq",     name:"Equations",      color:"var(--u6)" },
 ];
-
 const VALUES = [100,200,300,400,500];
 
 const CLUES = {
@@ -165,11 +160,11 @@ const CLUES = {
     {q:"If wavelength decreases, what happens to frequency (and energy)?", a:"Frequency increases (and energy increases)."},
     {q:"What did Rutherford’s gold foil experiment reveal about atoms?", a:"A small, dense, positively charged nucleus; atoms are mostly empty space."},
     {q:"Same element, different neutrons: what are these called?", a:"Isotopes."},
-    {q:"An atom with 17 protons and 18 electrons has what net charge?", a:"−1 (one extra electron)."},
+    {q:"An atom with 17 protons and 18 electrons has what net charge?", a:"-1 (one extra electron)."},
     {q:"Average atomic mass is calculated as what kind of average?", a:"A weighted average using isotopic abundances."}
   ],
   ptable: [
-    {q:"Across a period (left → right), atomic radius generally does what?", a:"Decreases."},
+    {q:"Across a period (left to right), atomic radius generally does what?", a:"Decreases."},
     {q:"Down a group, ionization energy generally does what?", a:"Decreases."},
     {q:"Elements in the same group share similar chemistry because they share similar…", a:"Valence electron patterns."},
     {q:"Name the families: Group 1 and Group 17 are called what?", a:"Alkali metals; Halogens."},
@@ -178,41 +173,39 @@ const CLUES = {
   bond: [
     {q:"Bond type most likely between a metal and a nonmetal?", a:"Ionic bonding."},
     {q:"VSEPR: AX2E2 has what molecular shape?", a:"Bent (tetrahedral electron geometry)."},
-    {q:"Which is polar: CO₂, CH₄, or NH₃?", a:"NH₃ is polar."},
-    {q:"Name the IMF: attraction between partial charges in polar molecules.", a:"Dipole–dipole forces."},
+    {q:"Which is polar: CO2, CH4, or NH3?", a:"NH3 is polar."},
+    {q:"Name the IMF: attraction between partial charges in polar molecules.", a:"Dipole-dipole forces."},
     {q:"Why do ionic compounds conduct electricity in solution but not as solids?", a:"Ions are mobile in solution; locked in place in a solid lattice."}
   ],
   moles: [
-    {q:"How many particles are in 1 mole?", a:"6.022 × 10²³ particles (Avogadro’s number)."},
-    {q:"Convert: 22.0 g NaCl (58.44 g/mol) → moles (closest).", a:"≈ 0.376 mol."},
-    {q:"Define percent composition.", a:"(mass of element ÷ total mass of compound) × 100%."},
+    {q:"How many particles are in 1 mole?", a:"6.022 x 10^23 particles (Avogadro’s number)."},
+    {q:"Convert: 22.0 g NaCl (58.44 g/mol) to moles (closest).", a:"Approximately 0.376 mol."},
+    {q:"Define percent composition.", a:"(mass of element ÷ total mass of compound) x 100%."},
     {q:"Empirical vs molecular formula: which is simplest whole-number ratio?", a:"Empirical formula."},
-    {q:"Empirical CH₂, molar mass 56 g/mol → molecular formula?", a:"C₄H₈ (because 56/14 = 4)."}
+    {q:"Empirical CH2, molar mass 56 g/mol: molecular formula?", a:"C4H8 (because 56/14 = 4)."}
   ],
   eq: [
-    {q:"Balance: __Al + __O₂ → __Al₂O₃", a:"4Al + 3O₂ → 2Al₂O₃."},
-    {q:"Classify: CH₄ + 2O₂ → CO₂ + 2H₂O", a:"Combustion."},
-    {q:"Reaction pattern: AB → A + B is called what?", a:"Decomposition."},
-    {q:"Reaction pattern: A + BC → AC + B is called what?", a:"Single replacement (single displacement)."},
+    {q:"Balance: __Al + __O2 -> __Al2O3", a:"4Al + 3O2 -> 2Al2O3."},
+    {q:"Classify: CH4 + 2O2 -> CO2 + 2H2O", a:"Combustion."},
+    {q:"Reaction pattern: AB -> A + B is called what?", a:"Decomposition."},
+    {q:"Reaction pattern: A + BC -> AC + B is called what?", a:"Single replacement (single displacement)."},
     {q:"Why do we balance equations?", a:"To obey conservation of atoms/mass (same number of each atom on both sides)."}
   ]
 };
 
-/* --------------------------
+/* =========================
    STATE
--------------------------- */
-const KEY = "chemJeopTeamsV1";
+========================= */
+const KEY = "chemJeopTeamsV2";
 let state = JSON.parse(localStorage.getItem(KEY) || "{}");
 if (!state.used) state.used = {};               // used["cat-idx"]=true
+if (!state.teams) state.teams = ["Team A","Team B","Team C"]; // editable list
 if (!state.teamScores) state.teamScores = {};  // {teamName:number}
-for (const t of TEAMS) if (typeof state.teamScores[t] !== "number") state.teamScores[t] = 0;
 if (!state.dd) state.dd = null;
 
-let currentClue = null; // {catId, idx, value, dd}
-
-/* --------------------------
-   HELPERS
--------------------------- */
+function save(){
+  localStorage.setItem(KEY, JSON.stringify(state));
+}
 function cellKey(catId, idx){ return `${catId}-${idx}`; }
 
 function pickDailyDouble(){
@@ -223,67 +216,130 @@ function pickDailyDouble(){
   return unused[Math.floor(Math.random()*unused.length)];
 }
 
-function save(){
-  localStorage.setItem(KEY, JSON.stringify(state));
-}
-
-/* --------------------------
-   RENDER TEAMS
--------------------------- */
+/* =========================
+   TEAMS UI
+========================= */
 const teamsHost = document.getElementById("teams");
 const teamSelect = document.getElementById("teamSelect");
+document.getElementById("addTeam").addEventListener("click", ()=>{
+  const nextNum = state.teams.length + 1;
+  const name = `Team ${nextNum}`;
+  state.teams.push(name);
+  if (typeof state.teamScores[name] !== "number") state.teamScores[name] = 0;
+  save();
+  renderTeams();
+});
+
+function renameTeam(oldName, newName){
+  newName = (newName || "").trim();
+  if (!newName || newName === oldName) return;
+
+  // prevent duplicates
+  if (state.teams.includes(newName)){
+    alert("That team name already exists.");
+    return;
+  }
+
+  // move score
+  const oldScore = state.teamScores[oldName] || 0;
+  delete state.teamScores[oldName];
+  state.teamScores[newName] = oldScore;
+
+  // swap in teams array
+  state.teams = state.teams.map(t => t===oldName ? newName : t);
+
+  save();
+  renderTeams();
+}
+
+function deleteTeam(name){
+  if (state.teams.length <= 1){
+    alert("Keep at least one team.");
+    return;
+  }
+  if (!confirm(`Delete ${name}?`)) return;
+
+  // remove
+  state.teams = state.teams.filter(t => t !== name);
+  delete state.teamScores[name];
+
+  save();
+  renderTeams();
+}
 
 function renderTeams(){
-  teamsHost.innerHTML = "";
+  // ensure all scores exist
+  for (const t of state.teams){
+    if (typeof state.teamScores[t] !== "number") state.teamScores[t] = 0;
+  }
+
   teamSelect.innerHTML = "";
-
-  TEAMS.forEach((name, idx)=>{
-    // select option
+  state.teams.forEach(t=>{
     const opt = document.createElement("option");
-    opt.value = name;
-    opt.textContent = name;
+    opt.value = t;
+    opt.textContent = t;
     teamSelect.appendChild(opt);
+  });
 
-    // row
+  teamsHost.innerHTML = "";
+  state.teams.forEach((name)=>{
     const row = document.createElement("div");
     row.className = "teamRow";
 
     const left = document.createElement("div");
-    left.innerHTML = `<div class="teamName">${name}</div><div class="small">Score</div>`;
+    left.className = "teamTop";
 
-    const mid = document.createElement("div");
-    mid.className = "teamScore";
-    mid.id = "ts-" + idx;
-    mid.textContent = state.teamScores[name];
+    const input = document.createElement("input");
+    input.className = "teamNameInput";
+    input.value = name;
+    input.setAttribute("aria-label", "Team name");
+    input.addEventListener("keydown", (e)=>{
+      if (e.key === "Enter"){
+        e.preventDefault();
+        input.blur();
+      }
+    });
+    input.addEventListener("blur", ()=>{
+      renameTeam(name, input.value);
+    });
+
+    const score = document.createElement("div");
+    score.className = "teamScore";
+    score.textContent = state.teamScores[name];
+
+    left.appendChild(input);
+    left.appendChild(score);
 
     const right = document.createElement("div");
     right.className = "teamBtns";
-    const b1 = document.createElement("button"); b1.className="btn"; b1.textContent="+100";
-    const b2 = document.createElement("button"); b2.className="btn"; b2.textContent="-100";
-    const b3 = document.createElement("button"); b3.className="btn"; b3.textContent="Reset";
 
-    b1.addEventListener("click", ()=>{ state.teamScores[name]+=100; save(); renderTeams(); });
-    b2.addEventListener("click", ()=>{ state.teamScores[name]-=100; save(); renderTeams(); });
-    b3.addEventListener("click", ()=>{ state.teamScores[name]=0; save(); renderTeams(); });
+    const plus = document.createElement("button"); plus.className="btn"; plus.textContent="+100";
+    const minus = document.createElement("button"); minus.className="btn"; minus.textContent="-100";
+    const reset = document.createElement("button"); reset.className="btn"; reset.textContent="Reset";
+    const del = document.createElement("button"); del.className="btn danger"; del.textContent="Delete";
 
-    right.appendChild(b1); right.appendChild(b2); right.appendChild(b3);
+    plus.addEventListener("click", ()=>{ state.teamScores[name]+=100; save(); renderTeams(); });
+    minus.addEventListener("click", ()=>{ state.teamScores[name]-=100; save(); renderTeams(); });
+    reset.addEventListener("click", ()=>{ state.teamScores[name]=0; save(); renderTeams(); });
+    del.addEventListener("click", ()=> deleteTeam(name));
+
+    right.appendChild(plus); right.appendChild(minus); right.appendChild(reset); right.appendChild(del);
 
     row.appendChild(left);
-    row.appendChild(mid);
     row.appendChild(right);
     teamsHost.appendChild(row);
   });
+
+  save();
 }
 
-/* --------------------------
-   BUILD BOARD
--------------------------- */
+/* =========================
+   BOARD
+========================= */
 const board = document.getElementById("board");
-
 function renderBoard(){
   board.innerHTML = "";
 
-  // categories row
   for (const cat of CATS){
     const el = document.createElement("div");
     el.className = "cat";
@@ -295,7 +351,6 @@ function renderBoard(){
   if (!state.dd) state.dd = pickDailyDouble();
   const dd = state.dd;
 
-  // clue cells
   for (let r=0;r<5;r++){
     for (const cat of CATS){
       const idx = r;
@@ -318,13 +373,12 @@ function renderBoard(){
       board.appendChild(el);
     }
   }
-
   save();
 }
 
-/* --------------------------
-   MODAL
--------------------------- */
+/* =========================
+   MODAL / AWARDING
+========================= */
 const overlay = document.getElementById("overlay");
 const closeBtn = document.getElementById("close");
 const mhead = document.getElementById("mhead");
@@ -335,13 +389,12 @@ const qtext = document.getElementById("qtext");
 const qsub = document.getElementById("qsub");
 const reveal = document.getElementById("reveal");
 const atext = document.getElementById("atext");
-const usedNote = document.getElementById("usedNote");
-const currentValue = document.getElementById("currentValue");
+
+let currentClue = null;
 
 function openClue(catId, idx, value, isDD){
   const cat = CATS.find(c=>c.id===catId);
   const clue = CLUES[catId][idx];
-
   currentClue = {catId, idx, value, dd:isDD};
 
   mhead.style.background = cat.color;
@@ -349,26 +402,18 @@ function openClue(catId, idx, value, isDD){
   mval.textContent = "$" + value;
   mdd.style.display = isDD ? "inline-block" : "none";
 
-  currentValue.textContent = "$" + value;
-
   qtext.textContent = clue.q;
-  qsub.textContent = isDD
-    ? "Daily Double: you can use the listed value, or decide a custom wager verbally."
-    : "Give teams ~20–30 seconds, then reveal.";
+  qsub.textContent = isDD ? "Daily Double: use listed value (or verbally set a wager)." : "Give teams ~20–30 seconds, then reveal.";
 
   reveal.style.display = "none";
   atext.textContent = clue.a;
-  usedNote.style.display = "none";
 
   overlay.style.display = "flex";
 }
-
 function closeClue(){
   overlay.style.display = "none";
   currentClue = null;
-  currentValue.textContent = "$—";
 }
-
 closeBtn.addEventListener("click", closeClue);
 overlay.addEventListener("click", (e)=>{ if(e.target===overlay) closeClue(); });
 
@@ -379,13 +424,9 @@ document.getElementById("showAns").addEventListener("click", ()=>{
 function markUsed(){
   if (!currentClue) return;
   state.used[cellKey(currentClue.catId, currentClue.idx)] = true;
-
-  // if used daily double, pick another for remaining clues
   if (state.dd && state.dd.catId===currentClue.catId && state.dd.idx===currentClue.idx){
     state.dd = pickDailyDouble();
   }
-
-  usedNote.style.display = "block";
   save();
   renderBoard();
 }
@@ -393,24 +434,23 @@ function markUsed(){
 function award(delta){
   if (!currentClue) return;
   const team = teamSelect.value;
-  state.teamScores[team] += delta;
+  state.teamScores[team] = (state.teamScores[team] || 0) + delta;
   markUsed();
   renderTeams();
 }
 
-/* Buttons */
 document.getElementById("awardPlus").addEventListener("click", ()=> award(+currentClue.value));
 document.getElementById("awardMinus").addEventListener("click", ()=> award(-currentClue.value));
 document.getElementById("markUsed").addEventListener("click", markUsed);
 
-/* --------------------------
+/* =========================
    CONTROLS
--------------------------- */
+========================= */
 document.getElementById("reset").addEventListener("click", ()=>{
   if (!confirm("Reset the board AND all team scores?")) return;
   state.used = {};
   state.dd = null;
-  for (const t of TEAMS) state.teamScores[t] = 0;
+  for (const t of state.teams) state.teamScores[t] = 0;
   save();
   renderTeams();
   renderBoard();
